@@ -1922,3 +1922,52 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* Allow grid/flex children to shrink to the viewport. */
+.app-shell,
+.filters-grid > *,
+.details-top-grid > *,
+.dashboard-grid > *,
+.formula-grid > *,
+.page-header > *,
+.card-heading-row > *,
+.filter-card-top > *,
+.chart-card,
+.chart-ranking,
+.chart-evolution,
+.metric-summary-card {
+    min-width: 0;
+}
+
+.chart {
+    width: 100%;
+    max-width: 100%;
+}
+
+.page-header h1,
+.card-heading-row h2,
+.metric-summary-value,
+.checkbox-option span {
+    overflow-wrap: anywhere;
+}
+
+.checkbox-multiselect-panel {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+}
+
+.checkbox-multiselect-label {
+    min-width: 0;
+}
+
+@media (max-width: 780px) {
+    .filter-card-top,
+    .metric-card-header {
+        flex-wrap: wrap;
+    }
+
+    .metric-summary-value {
+        font-size: clamp(30px, 9vw, 48px);
+    }
+}

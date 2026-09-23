@@ -302,13 +302,15 @@ function render() {
     ZooCharts.ranking(
         rankingTecnicosChart,
         detalhesData.ranking_tecnicos,
-        metric.nome
+        metric.nome,
+        metric.unidade
     );
 
     ZooCharts.ranking(
         rankingProdutoresChart,
         detalhesData.ranking_produtores,
-        metric.nome
+        metric.nome,
+        metric.unidade
     );
 
     ZooCharts.evolution(

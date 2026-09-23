@@ -11,6 +11,8 @@ class FilterController {
         this.contextProvider = contextProvider;
         this.silent = false;
         this.refreshController = null;
+        this.refreshId = 0;
+        this.changeId = 0;
         this.multiState = new Map();
 
         document.addEventListener("click", event => {
@@ -251,17 +253,23 @@ normalizeOptions(field, raw) {
             return;
         }
 
+        // API options are availability, never the source of selected values.
+        const previousOptions = state.displayOptions || state.options;
         state.options = options;
+        if (selected !== undefined) {
+            state.selected = new Set(this.normalizeArray(selected));
+        }
 
-        state.selected = new Set(
-            this.normalizeArray(selected)
-                .filter(value =>
-                    options.some(
-                        option =>
-                            option.value === value
-                    )
-                )
-        );
+        // Keep unavailable selections visible and removable, retaining their labels.
+        const displayed = new Map(options.map(option => [option.value, option]));
+        state.selected.forEach(value => {
+            if (!displayed.has(value)) {
+                displayed.set(value, previousOptions.find(option => option.value === value)
+                    || { value, label: value });
+            }
+        });
+        options = [...displayed.values()];
+        state.displayOptions = options;
 
         const allSelected =
             options.length > 0
@@ -387,9 +395,8 @@ normalizeOptions(field, raw) {
     async loadOptions({
         preserve = true
     } = {}) {
-        const ownCurrent = preserve
-            ? this.values()
-            : {};
+        const requestId = ++this.refreshId;
+        const ownCurrent = preserve ? this.values() : {};
 
         const current = {
             ...(
@@ -414,6 +421,12 @@ normalizeOptions(field, raw) {
             }
         );
 
+        if (requestId !== this.refreshId) {
+            return false;
+        }
+
+        // Read live selections after await; never restore a stale snapshot.
+        const latest = this.values();
         this.silent = true;
 
         try {
@@ -427,7 +440,7 @@ normalizeOptions(field, raw) {
                     this.renderMultiOptions(
                         field,
                         options,
-                        ownCurrent[field.apiKey]
+                        latest[field.apiKey] || []
                     );
                     continue;
                 }
@@ -438,9 +451,12 @@ normalizeOptions(field, raw) {
                     continue;
                 }
 
-                const currentValue = ownCurrent[field.apiKey]
-                    ? String(ownCurrent[field.apiKey])
+                const currentValue = latest[field.apiKey]
+                    ? String(latest[field.apiKey])
                     : "";
+                if (currentValue && !options.some(option => option.value === currentValue)) {
+                    options.push({ value: currentValue, label: currentValue });
+                }
 
                 select.innerHTML = "";
 
@@ -470,6 +486,12 @@ normalizeOptions(field, raw) {
         }
     }
 
+    invalidateRefresh() {
+        ++this.refreshId;
+        ++this.changeId;
+        this.refreshController?.abort();
+    }
+
     set(apiKey, value) {
         const field = this.fields.find(
             item => item.apiKey === apiKey
@@ -479,11 +501,13 @@ normalizeOptions(field, raw) {
             return;
         }
 
+        this.invalidateRefresh();
         if (field.multi) {
             const state = this.getState(field);
-            state.selected = new Set(this.normalizeArray(value));
+            state.selected = new Set(this.normalizeArray(value)
+                .filter(item => field.apiKey !== "ano" || Number(item) >= 2023));
 
-            if (state.options.length) {
+            if (state.host || state.options.length) {
                 this.renderMultiOptions(
                     field,
                     state.options,
@@ -502,6 +526,7 @@ normalizeOptions(field, raw) {
     }
 
     clear() {
+        this.invalidateRefresh();
         this.silent = true;
 
         try {
@@ -510,7 +535,7 @@ normalizeOptions(field, raw) {
                     const state = this.getState(field);
                     state.selected.clear();
 
-                    if (state.options.length) {
+                    if (state.host || state.options.length) {
                         this.renderMultiOptions(
                             field,
                             state.options,
@@ -538,23 +563,24 @@ normalizeOptions(field, raw) {
             return;
         }
 
+        const changeId = ++this.changeId;
         if (this.includeDependentRefresh) {
             try {
-                await this.loadOptions({
+                const applied = await this.loadOptions({
                     preserve: true
                 });
+                if (applied === false) return;
             }
             catch (error) {
-                if (error.name !== "AbortError") {
-                    console.error(
-                        "Erro ao atualizar filtros dependentes:",
-                        error
-                    );
-                }
+                if (error.name === "AbortError") return;
+                console.error(
+                    "Erro ao atualizar filtros dependentes:",
+                    error
+                );
             }
         }
 
-        if (this.onChange) {
+        if (changeId === this.changeId && this.onChange) {
             this.onChange(this.values());
         }
     }

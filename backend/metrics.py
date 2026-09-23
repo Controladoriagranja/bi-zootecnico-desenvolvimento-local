@@ -250,6 +250,14 @@ def sql_metrica(metric_id: str) -> str:
         ponderador = metrica["ponderador"]
         peso = sql_numero(ponderador)
 
+        if metric_id == "vazio":
+            # Exclude invalid Vazio from both numerator and denominator only here.
+            valido = f"({valor}) BETWEEN 7 AND 18"
+            return (
+                f"SUM(CASE WHEN {valido} THEN ({valor}) * ({peso}) END) "
+                f"/ NULLIF(SUM(CASE WHEN {valido} THEN ({peso}) END), 0)"
+            )
+
         return (
             f"SUM(({valor}) * ({peso})) "
             f"/ NULLIF(SUM({peso}), 0)"
