@@ -11,7 +11,6 @@
     root.className = "side-nav-root";
     root.innerHTML = `
         <button class="side-nav-rail" type="button" aria-label="Abrir menu" aria-expanded="false">
-            <img src="assets/img/favicon-granja.png" alt="" class="side-nav-mark">
             <span class="side-nav-hamburger" aria-hidden="true"><i></i><i></i><i></i></span>
         </button>
         <div class="side-nav-overlay" aria-hidden="true"></div>
@@ -33,6 +32,7 @@
         </aside>
     `;
 
+    document.body.classList.add("has-side-nav");
     document.body.prepend(root);
 
     const rail = root.querySelector(".side-nav-rail");

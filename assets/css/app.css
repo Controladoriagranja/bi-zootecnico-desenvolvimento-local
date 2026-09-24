@@ -2364,3 +2364,75 @@ body.side-nav-open { overflow: hidden; }
     line-height: 1.35;
     font-weight: 500;
 }
+
+/* ============================================================
+   V7.14 - nitidez dos graficos, menu circular e tabela ordenavel
+   ============================================================ */
+.side-nav-rail {
+    top: 14px;
+    left: 14px;
+    width: 46px;
+    height: 46px;
+    min-height: 46px;
+    padding: 0;
+    border-radius: 50%;
+    gap: 0;
+}
+.side-nav-rail:hover { transform: translateY(-1px); }
+.side-nav-hamburger { width: 20px; gap: 4px; }
+.side-nav-hamburger i { height: 2px; }
+
+/* Reserva espaco somente no cabecalho: o botao nao acompanha os graficos/tabelas. */
+.side-nav-root { position: absolute; inset: 0 auto auto 0; height: 0; }
+.side-nav-rail { position: absolute; }
+.side-nav-overlay,
+.side-nav-panel { position: fixed; }
+.has-side-nav .app-shell > header:first-child,
+.has-side-nav .app-shell > .page-header:first-child {
+    padding-left: 58px;
+}
+
+.lotes-sort-button {
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.lotes-sort-button.num { justify-content: flex-end; }
+.lotes-sort-button .sort-icon { opacity: .48; font-size: 10px; }
+.lotes-sort-button:hover .sort-icon,
+.lotes-sort-button.active .sort-icon { opacity: 1; color: var(--primary); }
+
+/* Os SVGs do ECharts permanecem vetoriais em zoom e telas de alta densidade. */
+.lotes-chart > div,
+.lotes-chart svg { width: 100% !important; max-width: 100%; }
+.lotes-chart svg { overflow: visible; }
+
+@media (max-width: 780px) {
+    .side-nav-rail {
+        top: 10px;
+        left: 10px;
+        width: 42px;
+        height: 42px;
+        min-height: 42px;
+    }
+    .has-side-nav .app-shell > header:first-child,
+    .has-side-nav .app-shell > .page-header:first-child {
+        padding-left: 50px;
+    }
+    .lotes-chart-card { padding-left: 10px; padding-right: 10px; }
+    .lotes-chart { height: 270px; }
+}
+
+@media (max-width: 420px) {
+    .lotes-reference-table th,
+    .lotes-reference-table td { font-size: 10px; }
+}

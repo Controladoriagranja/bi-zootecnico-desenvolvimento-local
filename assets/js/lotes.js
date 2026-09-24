@@ -1,6 +1,6 @@
 (() => {
     const WEEKS = [7, 14, 21, 28, 35, 42];
-    const state = { raw: [], rows: [], latest: null, charts: [], filters: null };
+    const state = { raw: [], rows: [], latest: null, charts: [], filters: null, sort: { key: "aves", dir: "desc" }, resizeObserver: null };
 
     const $ = id => document.getElementById(id);
     const num = value => {
@@ -240,15 +240,32 @@
             textStyle: { fontFamily: "Geist, Inter, system-ui, sans-serif", color: text },
             tooltip: { trigger: "axis", confine: true, backgroundColor: css("--card"), borderColor: border, textStyle: { color: text }, extraCssText: "border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.10)" },
             grid: { left: 48, right: 28, top: 34, bottom: 42 },
-            xAxis: { type: "category", axisLine: { lineStyle: { color: border } }, axisTick: { show: false }, axisLabel: { color: muted, fontSize: 11 } },
-            yAxis: { type: "value", axisLine: { show: false }, axisTick: { show: false }, splitLine: { lineStyle: { color: border, opacity: .7 } }, axisLabel: { color: muted, fontSize: 10 } }
+            xAxis: {
+                type: "category",
+                axisLine: { lineStyle: { color: border } },
+                axisTick: { show: false },
+                axisLabel: {
+                    color: muted,
+                    fontSize: window.matchMedia?.("(max-width: 640px)").matches ? 10 : 11,
+                    interval: 0,
+                    hideOverlap: false,
+                    formatter: value => window.matchMedia?.("(max-width: 640px)").matches
+                        ? String(value).replace(" dias", "d")
+                        : value
+                }
+            },
+            yAxis: { type: "value", axisLine: { show: false }, axisTick: { show: false }, splitLine: { lineStyle: { color: border, opacity: .7 } }, axisLabel: { color: muted, fontSize: 10, formatter: value => fmt(value) } }
         };
     }
 
     function getChart(id) {
         const el = $(id);
-        const chart = echarts.getInstanceByDom(el) || echarts.init(el);
+        const chart = echarts.getInstanceByDom(el) || echarts.init(el, null, { renderer: "svg" });
         if (!state.charts.includes(chart)) state.charts.push(chart);
+        if (state.resizeObserver && !el.dataset.resizeObserved) {
+            state.resizeObserver.observe(el);
+            el.dataset.resizeObserved = "true";
+        }
         return chart;
     }
 
@@ -262,17 +279,17 @@
         const mortality = getChart("chartMortalidade");
         mortality.setOption({ ...base,
             xAxis: { ...base.xAxis, data: weekly.map(x => x.label) },
-            yAxis: [base.yAxis, { ...base.yAxis, position: "right", axisLabel: { color: muted, formatter: "{value}%" }, splitLine: { show: false } }],
+            yAxis: [base.yAxis, { ...base.yAxis, position: "right", axisLabel: { color: muted, fontSize: 10, formatter: value => `${fmt(value, 1)}%` }, splitLine: { show: false } }],
             series: [
-                { name: "M+D (Qtde)", type: "bar", yAxisIndex: 0, data: weekly.map(x => x.deaths), barMaxWidth: 42, itemStyle: { color: primary, borderRadius: [8, 8, 2, 2] }, label: { show: true, position: "insideTop", color: "#fff", fontSize: 10, fontWeight: 700, formatter: p => fmt(p.value) } },
-                { name: "M+D (%)", type: "line", yAxisIndex: 1, data: weekly.map(x => x.mortality), symbol: "circle", symbolSize: 8, smooth: .32, lineStyle: { color: accent, width: 3 }, itemStyle: { color: accent }, label: { show: true, position: "top", color: primary, backgroundColor: accent, borderRadius: 5, padding: [3,5], formatter: p => p.value == null ? "" : `${fmt(p.value,2)}%` } }
+                { name: "M+D (Qtde)", type: "bar", yAxisIndex: 0, data: weekly.map(x => x.deaths), tooltip: { valueFormatter: value => fmt(value) }, barMaxWidth: 42, itemStyle: { color: primary, borderRadius: [8, 8, 2, 2] }, label: { show: true, position: "insideTop", color: "#fff", fontSize: 10, fontWeight: 700, formatter: p => fmt(p.value) }, labelLayout: { hideOverlap: true } },
+                { name: "M+D (%)", type: "line", yAxisIndex: 1, data: weekly.map(x => x.mortality), tooltip: { valueFormatter: value => value == null ? "—" : `${fmt(value, 2)}%` }, symbol: "circle", symbolSize: 8, smooth: .32, lineStyle: { color: accent, width: 3 }, itemStyle: { color: accent }, label: { show: true, position: "top", distance: 8, color: primary, backgroundColor: accent, borderRadius: 5, padding: [3,5], formatter: p => p.value == null ? "" : `${fmt(p.value,2)}%` }, labelLayout: { hideOverlap: true, moveOverlap: "shiftY" } }
             ]
         }, true);
 
         const weight = getChart("chartPesoSemanal");
         weight.setOption({ ...base,
             xAxis: { ...base.xAxis, data: weekly.map(x => x.label) },
-            series: [{ name: "Peso Médio", type: "bar", data: weekly.map(x => x.weight), barMaxWidth: 54, itemStyle: { color: primary, borderRadius: [10, 10, 3, 3] }, label: { show: true, position: "top", color: muted, fontSize: 10, formatter: p => p.value == null ? "" : fmt(p.value, 2) } }]
+            series: [{ name: "Peso Médio", type: "bar", data: weekly.map(x => x.weight), tooltip: { valueFormatter: value => value == null ? "—" : fmt(value, 2) }, barMaxWidth: 54, itemStyle: { color: primary, borderRadius: [10, 10, 3, 3] }, label: { show: true, position: "top", distance: 7, color: muted, fontSize: 10, formatter: p => p.value == null ? "" : fmt(p.value, 2) }, labelLayout: { hideOverlap: true } }]
         }, true);
 
         const growthPoints = [{ week: 0, label: "0", value: (() => { const ps=rows.map(r=>num(r.source["Ps Pinto"])).filter(v=>v!==null);return ps.length?ps.reduce((a,b)=>a+b,0)/ps.length:null; })() }, ...weekly.map(x => ({ week: x.week, label: String(x.week), value: x.weight }))].filter(x => x.value !== null);
@@ -280,7 +297,7 @@
         growth.setOption({ ...base,
             grid: { left: 48, right: 24, top: 42, bottom: 46 },
             xAxis: { ...base.xAxis, data: growthPoints.map(x => x.label), name: "Idade", nameLocation: "middle", nameGap: 30, nameTextStyle: { color: muted, fontSize: 10 } },
-            series: [{ name: "Peso", type: "line", data: growthPoints.map(x => x.value), smooth: .42, symbol: "circle", symbolSize: 7, lineStyle: { color: primary, width: 4, cap: "round" }, itemStyle: { color: primary }, areaStyle: { color: { type: "linear", x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:"rgba(122,23,38,.42)"},{offset:1,color:"rgba(122,23,38,.06)"}] } }, label: { show: true, position: "top", color: muted, fontWeight: 650, formatter: p => fmt(p.value, 2) } }]
+            series: [{ name: "Peso", type: "line", data: growthPoints.map(x => x.value), tooltip: { valueFormatter: value => value == null ? "—" : fmt(value, 2) }, smooth: .42, symbol: "circle", symbolSize: 7, lineStyle: { color: primary, width: 4, cap: "round" }, itemStyle: { color: primary }, areaStyle: { color: { type: "linear", x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:"rgba(122,23,38,.42)"},{offset:1,color:"rgba(122,23,38,.06)"}] } }, label: { show: true, position: "top", distance: 8, color: muted, fontWeight: 650, formatter: p => fmt(p.value, 2) }, labelLayout: { hideOverlap: true, moveOverlap: "shiftY" } }]
         }, true);
     }
 
@@ -295,14 +312,42 @@
             g.mortes += mortalityThrough(row, limit);
             const w = latestWeight(row, limit); if (w !== null) g.weights.push(w);
         });
-        return [...groups.values()].map(g => ({ ...g, mortalidade: g.aves ? g.mortes/g.aves*100 : null, peso: g.weights.length ? g.weights.reduce((a,b)=>a+b,0)/g.weights.length : null })).sort((a,b)=>b.aves-a.aves);
+        return [...groups.values()].map(g => ({ ...g, mortalidade: g.aves ? g.mortes/g.aves*100 : null, peso: g.weights.length ? g.weights.reduce((a,b)=>a+b,0)/g.weights.length : null }));
+    }
+
+    function compareValues(a, b, key) {
+        const av = a[key];
+        const bv = b[key];
+        if (typeof av === "number" || typeof bv === "number") {
+            const an = av !== null && av !== undefined && Number.isFinite(Number(av)) ? Number(av) : -Infinity;
+            const bn = bv !== null && bv !== undefined && Number.isFinite(Number(bv)) ? Number(bv) : -Infinity;
+            return an - bn;
+        }
+        return String(av ?? "").localeCompare(String(bv ?? ""), "pt-BR", { numeric: true, sensitivity: "base" });
+    }
+
+    function sortedGroups(groups) {
+        const { key, dir } = state.sort;
+        const multiplier = dir === "asc" ? 1 : -1;
+        return [...groups].sort((a, b) => compareValues(a, b, key) * multiplier);
+    }
+
+    function updateSortHeaders() {
+        document.querySelectorAll(".lotes-sort-button").forEach(button => {
+            const active = button.dataset.sort === state.sort.key;
+            button.classList.toggle("active", active);
+            button.setAttribute("aria-sort", active ? (state.sort.dir === "asc" ? "ascending" : "descending") : "none");
+            const icon = button.querySelector(".sort-icon");
+            if (icon) icon.textContent = active ? (state.sort.dir === "asc" ? "↑" : "↓") : "↕";
+        });
     }
 
     function renderTable(rows) {
-        const groups = aggregateTable(rows);
+        const groups = sortedGroups(aggregateTable(rows));
         $("tabelaLotesBody").innerHTML = groups.length ? groups.map(g => `<tr><td>${esc(g.tipo)}</td><td>${esc(g.produtor)}</td><td>${esc(g.linhagem)}</td><td class="num">${fmt(g.aves)}</td><td class="num">${fmt(g.mortes)}</td><td class="num">${fmt(g.mortalidade,2)}%</td><td class="num">${fmt(g.peso,2)}</td></tr>`).join("") : '<tr><td colspan="7">Nenhum lote encontrado para os filtros selecionados.</td></tr>';
         const t = totals(rows);
         $("tabelaLotesFoot").innerHTML = `<tr><th colspan="3">Total</th><th class="num">${fmt(t.aves)}</th><th class="num">${fmt(t.mortes)}</th><th class="num">${fmt(t.mortalidade,2)}%</th><th class="num">${fmt(t.peso,2)}</th></tr>`;
+        updateSortHeaders();
     }
 
     function render() {
@@ -322,7 +367,19 @@
         try {
             prepareRows();
             setupFilters();
+            state.resizeObserver = typeof ResizeObserver !== "undefined"
+                ? new ResizeObserver(entries => entries.forEach(entry => echarts.getInstanceByDom(entry.target)?.resize()))
+                : null;
             $("limparFiltrosLotes").addEventListener("click", clearFilters);
+            document.querySelectorAll(".lotes-sort-button").forEach(button => {
+                button.addEventListener("click", () => {
+                    const key = button.dataset.sort;
+                    state.sort = state.sort.key === key
+                        ? { key, dir: state.sort.dir === "asc" ? "desc" : "asc" }
+                        : { key, dir: ["tipo", "produtor", "linhagem"].includes(key) ? "asc" : "desc" };
+                    renderTable(state.rows);
+                });
+            });
             render();
             window.addEventListener("resize", () => state.charts.forEach(chart => chart.resize()));
             new MutationObserver(() => renderCharts(state.rows)).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });

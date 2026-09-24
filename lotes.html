@@ -6,7 +6,7 @@
     <link rel="icon" href="assets/img/favicon-granja.png">
     <title>Lotes em Criação - BI Zootécnico</title>
     <script>(()=>{const saved=localStorage.getItem('bi-zootecnico-theme');if(saved)document.documentElement.dataset.theme=saved;})();</script>
-    <link href="assets/css/app.css?v=7.13" rel="stylesheet">
+    <link href="assets/css/app.css?v=7.14" rel="stylesheet">
     <link href="assets/vendor/geist/index.css" rel="stylesheet">
 </head>
 <body data-page="lotes" class="lotes-reference-page">
@@ -53,7 +53,7 @@
             <div class="lotes-chart" id="chartPesoSemanal"></div>
         </article>
         <article class="card lotes-chart-card">
-            <header><h2>Curva de Crescimento</h2></header>
+            <header><h2>Curva de Crescimento de Peso</h2></header>
             <div class="lotes-chart" id="chartCrescimento"></div>
         </article>
     </section>
@@ -62,9 +62,13 @@
         <div class="lotes-table-wrap lotes-reference-table-wrap">
             <table class="lotes-table lotes-reference-table">
                 <thead><tr>
-                    <th>Tipo Granja</th><th>Produtor</th><th>Linhagem Original</th>
-                    <th class="num">Aves Alojadas</th><th class="num">Mortalidade no Período</th>
-                    <th class="num">Mortalidade no Período (%)</th><th class="num">Peso Médio</th>
+                    <th><button class="lotes-sort-button" type="button" data-sort="tipo">Tipo Granja <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+                    <th><button class="lotes-sort-button" type="button" data-sort="produtor">Produtor <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+                    <th><button class="lotes-sort-button" type="button" data-sort="linhagem">Linhagem Original <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+                    <th class="num"><button class="lotes-sort-button num" type="button" data-sort="aves">Aves Alojadas <span class="sort-icon" aria-hidden="true">↓</span></button></th>
+                    <th class="num"><button class="lotes-sort-button num" type="button" data-sort="mortes">Mortalidade no Período <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+                    <th class="num"><button class="lotes-sort-button num" type="button" data-sort="mortalidade">Mortalidade no Período (%) <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+                    <th class="num"><button class="lotes-sort-button num" type="button" data-sort="peso">Peso Médio <span class="sort-icon" aria-hidden="true">↕</span></button></th>
                 </tr></thead>
                 <tbody id="tabelaLotesBody"></tbody>
                 <tfoot id="tabelaLotesFoot"></tfoot>
@@ -79,7 +83,7 @@
 <script src="assets/js/filters.js?v=7.12"></script>
 <script src="data/base_dinamica_local.js?v=7.10"></script>
 <script src="data/lotes_45d_local.js?v=7.13"></script>
-<script src="assets/js/lotes.js?v=7.13"></script>
-<script src="assets/js/sidebar.js?v=7.8"></script>
+<script src="assets/js/lotes.js?v=7.14"></script>
+<script src="assets/js/sidebar.js?v=7.14"></script>
 </body>
 </html>
