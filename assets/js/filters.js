@@ -3,12 +3,14 @@ class FilterController {
         fields,
         onChange,
         includeDependentRefresh = true,
-        contextProvider = null
+        contextProvider = null,
+        filtersEndpoint = null
     }) {
         this.fields = fields;
         this.onChange = onChange;
         this.includeDependentRefresh = includeDependentRefresh;
         this.contextProvider = contextProvider;
+        this.filtersEndpoint = filtersEndpoint || APP_CONFIG.endpoints.filtros;
         this.silent = false;
         this.refreshController = null;
         this.refreshId = 0;
@@ -234,6 +236,7 @@ normalizeOptions(field, raw) {
     if (
         field.apiKey === "mes"
         || field.apiKey === "tipo_linhagem"
+        || field.apiKey === "faixa_idade"
     ) {
         return raw.map(item => ({
             value: String(item.valor),
@@ -414,7 +417,7 @@ normalizeOptions(field, raw) {
         this.refreshController = new AbortController();
 
         const response = await apiGet(
-            APP_CONFIG.endpoints.filtros,
+            this.filtersEndpoint,
             current,
             {
                 signal: this.refreshController.signal

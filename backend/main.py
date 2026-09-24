@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config import PARQUET_BASE_DINAMICA
 from metrics import METRICAS, ORDEM_INDICADORES, sql_metrica
+from lotes_criacao import router as lotes_criacao_router
 
 
 app = FastAPI(title="BI Zootécnico API")
@@ -21,6 +22,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(lotes_criacao_router)
 
 
 MESES = [
@@ -380,11 +383,17 @@ def info():
     caminho, _, coluna_data = garantir_cache_atualizado()
 
     with _cache_lock:
-        quantidade = _cache_con.execute(
-            f'SELECT COUNT(*) FROM "{CACHE_TABLE}"'
-        ).fetchone()[0]
+        quantidade, data_minima, data_maxima = _cache_con.execute(
+            f'''SELECT COUNT(*),
+                       MIN(TRY_CAST("{coluna_data}" AS DATE)),
+                       MAX(TRY_CAST("{coluna_data}" AS DATE))
+                FROM "{CACHE_TABLE}"'''
+        ).fetchone()
 
     return {
+        "ano_minimo": ANO_MINIMO,
+        "data_minima": data_minima,
+        "data_maxima": data_maxima,
         "arquivo": caminho.name,
         "atualizado_em": arquivo_atualizado_em(caminho),
         "cache_carregado_em": _cache_loaded_at,

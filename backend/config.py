@@ -1,6 +1,11 @@
 from pathlib import Path
 
 
-PARQUET_BASE_DINAMICA = Path(
-    r"\\192.168.1.139\Controladoria\BI_Granja\PortalBI\api\bi_local_api\teste.parquet"
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PARQUET_BASE_DINAMICA = (
+    PROJECT_ROOT / "data" / "indice_zootecnico_base_dinamica_tratado.parquet"
+)
+
+PARQUET_LOTES_ABERTOS = (
+    PROJECT_ROOT / "data" / "indice_zootecnico_mortalidade_peso_lotes_abertos_tratado.parquet"
 )

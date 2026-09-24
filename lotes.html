@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="assets/img/favicon-granja.png">
+    <title>Lotes em Criação - BI Zootécnico</title>
+    <script>(()=>{const saved=localStorage.getItem('bi-zootecnico-theme');if(saved)document.documentElement.dataset.theme=saved;})();</script>
+    <link href="assets/css/app.css?v=7.13" rel="stylesheet">
+    <link href="assets/vendor/geist/index.css" rel="stylesheet">
+</head>
+<body data-page="lotes" class="lotes-reference-page">
+<div class="app-shell lotes-shell">
+    <header class="lotes-compact-header">
+        <div>
+            <div class="eyebrow">Dashboard Zootécnico</div>
+            <h1>Lotes em Criação</h1>
+        </div>
+        <div class="lotes-period-badge" aria-label="Período máximo do painel">
+            <span>Últimos 45 Dias</span><strong>45</strong>
+        </div>
+    </header>
+
+    <section class="card filter-card lotes-filter-card">
+        <div class="filter-card-top">
+            <div>
+                <h2>Filtros</h2>
+                <p>Todos os indicadores compartilham o mesmo contexto.</p>
+            </div>
+            <button class="button button-ghost-danger" id="limparFiltrosLotes" type="button">Limpar filtros</button>
+        </div>
+        <div class="filters-grid lotes-page-filters">
+            <div class="filter-field"><span>Período de Dias</span><div class="checkbox-multiselect" id="periodoDias"></div></div>
+            <div class="filter-field"><span>Tipo de Granja</span><div class="checkbox-multiselect" id="tipoGranja"></div></div>
+            <div class="filter-field"><span>Modelo</span><div class="checkbox-multiselect" id="modelo"></div></div>
+            <div class="filter-field"><span>Galpão</span><div class="checkbox-multiselect" id="galpao"></div></div>
+            <div class="filter-field"><span>Técnico</span><div class="checkbox-multiselect" id="tecnico"></div></div>
+            <div class="filter-field"><span>Mist Linha</span><div class="checkbox-multiselect" id="mistLinha"></div></div>
+        </div>
+    </section>
+
+    <div class="alert alert-error hidden" id="mensagemErroLotes"></div>
+
+    <section class="lotes-reference-kpis" id="cardsLotes"></section>
+
+    <section class="lotes-charts-grid">
+        <article class="card lotes-chart-card">
+            <header><div><h2>Mortalidade Semanal</h2><p class="chart-subtitle">Mortalidade considera M + D: mortes + descartes em cada idade.</p></div><div class="chart-legend"><span><i class="dot dot-primary"></i>M+D (Qtde)</span><span><i class="dot dot-accent"></i>M+D (%)</span></div></header>
+            <div class="lotes-chart" id="chartMortalidade"></div>
+        </article>
+        <article class="card lotes-chart-card">
+            <header><h2>Peso Médio Semanal por Idade</h2></header>
+            <div class="lotes-chart" id="chartPesoSemanal"></div>
+        </article>
+        <article class="card lotes-chart-card">
+            <header><h2>Curva de Crescimento</h2></header>
+            <div class="lotes-chart" id="chartCrescimento"></div>
+        </article>
+    </section>
+
+    <section class="card lotes-reference-table-card">
+        <div class="lotes-table-wrap lotes-reference-table-wrap">
+            <table class="lotes-table lotes-reference-table">
+                <thead><tr>
+                    <th>Tipo Granja</th><th>Produtor</th><th>Linhagem Original</th>
+                    <th class="num">Aves Alojadas</th><th class="num">Mortalidade no Período</th>
+                    <th class="num">Mortalidade no Período (%)</th><th class="num">Peso Médio</th>
+                </tr></thead>
+                <tbody id="tabelaLotesBody"></tbody>
+                <tfoot id="tabelaLotesFoot"></tfoot>
+            </table>
+        </div>
+    </section>
+</div>
+
+<script src="assets/vendor/echarts/echarts.min.js"></script>
+<script src="assets/js/theme.js?v=7.6"></script>
+<script src="assets/js/metrics.js?v=7.8"></script>
+<script src="assets/js/filters.js?v=7.12"></script>
+<script src="data/base_dinamica_local.js?v=7.10"></script>
+<script src="data/lotes_45d_local.js?v=7.13"></script>
+<script src="assets/js/lotes.js?v=7.13"></script>
+<script src="assets/js/sidebar.js?v=7.8"></script>
+</body>
+</html>

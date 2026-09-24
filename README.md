@@ -1,5 +1,7 @@
 # BI Zootécnico
 
+> **Ambiente local (24/09/2026):** consulte [DOCUMENTACAO-DADOS-LOCAL.md](DOCUMENTACAO-DADOS-LOCAL.md) para configuração, comandos e testes atuais. Este checkout usa a porta **8001**, preservando o serviço existente na 8000. As seções abaixo documentam a configuração anterior; não orientam publicação nesta etapa.
+
 Dashboard para acompanhar indicadores produtivos de aves, com comparação mensal por ano, detalhamento por produtor e técnico e catálogo de fórmulas. A interface usa HTML, CSS e JavaScript; a API usa FastAPI e DuckDB para consultar um arquivo Parquet.
 
 Documentação revisada em 22/09/2026 a partir do código presente no diretório de trabalho. Os assets HTML usam o marcador de cache `v=7.5`; ele não representa uma versão fixada das dependências.

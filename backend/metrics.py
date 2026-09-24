@@ -140,18 +140,22 @@ DIVIDE(
         "tipo_calculo": "media_ponderada",
         "ponderador": "Aves Abatidas",
         "casas_decimais": 1,
-        "formula_exibicao": "Σ(Vazio × Aves Abatidas) / Σ(Aves Abatidas)",
+        "formula_exibicao": "Σ(Vazio × Aves Abatidas) / Σ(Aves Abatidas), somente registros com 7 ≤ Vazio ≤ 18",
         "formula_dax": """base_dinamica_media_ponderada_vazio =
+VAR BaseValida =
+    FILTER(base_dinamica_tratado,
+        base_dinamica_tratado[Vazio] >= 7 && base_dinamica_tratado[Vazio] <= 18)
+RETURN
 DIVIDE(
     SUMX(
-        base_dinamica_tratado,
+        BaseValida,
         base_dinamica_tratado[Vazio] * base_dinamica_tratado[Aves Abatidas]
     ),
-    SUM(base_dinamica_tratado[Aves Abatidas])
+    SUMX(BaseValida, base_dinamica_tratado[Aves Abatidas])
 )""",
         "regra_adicional": {
-            "status": "pendente",
-            "descricao": "Valores de Vazio menores que 7 ou maiores que 18 precisam de tratamento. O valor/regra substituta ainda não foi definido."
+            "status": "implementada",
+            "descricao": "Somente registros com 7 ≤ Vazio ≤ 18 participam do numerador e do denominador. Valores fora do intervalo são excluídos, sem substituição."
         },
         "descricao": "Vazio médio ponderado pelas Aves Abatidas."
     },

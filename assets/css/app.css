@@ -1971,3 +1971,396 @@ body {
         font-size: clamp(30px, 9vw, 48px);
     }
 }
+
+/* ==========================================================
+   V7.6 - NAVEGAÇÃO LATERAL GRANA BRASÍLIA
+   ========================================================== */
+
+:root {
+    --brand-sidebar: #521019;
+    --brand-sidebar-hover: #641522;
+    --brand-sidebar-active: #6f1b28;
+    --brand-sidebar-gold: #c69b19;
+}
+
+.side-nav-root {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 1400;
+    pointer-events: none;
+}
+
+.side-nav-rail {
+    position: fixed;
+    left: 0;
+    top: 18px;
+    width: 48px;
+    min-height: 92px;
+    padding: 10px 7px;
+    border: 0;
+    border-radius: 0 12px 12px 0;
+    background: var(--brand-sidebar);
+    box-shadow: 0 10px 28px rgb(0 0 0 / 22%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: transform .18s ease, background .18s ease;
+}
+
+.side-nav-rail:hover {
+    background: var(--brand-sidebar-hover);
+    transform: translateX(2px);
+}
+
+.side-nav-mark {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.side-nav-hamburger {
+    width: 21px;
+    display: grid;
+    gap: 4px;
+}
+
+.side-nav-hamburger i {
+    height: 2px;
+    width: 100%;
+    display: block;
+    background: currentColor;
+    border-radius: 999px;
+}
+
+.side-nav-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgb(8 13 22 / 45%);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .2s ease, visibility .2s ease;
+}
+
+.side-nav-panel {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(270px, calc(100vw - 40px));
+    padding: 18px 14px 22px;
+    background: linear-gradient(180deg, #521019 0%, #451019 100%);
+    color: #fff;
+    box-shadow: 18px 0 48px rgb(0 0 0 / 30%);
+    transform: translateX(-102%);
+    pointer-events: auto;
+    transition: transform .22s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.side-nav-root.open .side-nav-panel { transform: translateX(0); }
+.side-nav-root.open .side-nav-overlay { opacity: 1; visibility: visible; pointer-events: auto; }
+.side-nav-root.open .side-nav-rail { visibility: hidden; }
+
+.side-nav-brand {
+    padding: 2px 4px 0;
+}
+
+.side-nav-panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.side-nav-logo {
+    width: 185px;
+    max-width: calc(100% - 42px);
+    height: auto;
+    object-fit: contain;
+}
+
+.side-nav-close {
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgb(255 255 255 / 16%);
+    border-radius: 8px;
+    background: transparent;
+    color: rgb(255 255 255 / 84%);
+    font: inherit;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.side-nav-close:hover { background: rgb(255 255 255 / 8%); }
+
+.side-nav-section-title {
+    margin-top: 10px;
+    padding: 0 2px 7px;
+    color: var(--brand-sidebar-gold);
+    border-bottom: 1px solid rgb(198 155 25 / 30%);
+    font-size: 11px;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: .02em;
+}
+
+.side-nav-links {
+    display: grid;
+    gap: 3px;
+    padding: 4px 4px 0;
+}
+
+.side-nav-link {
+    min-height: 36px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    border-left: 3px solid transparent;
+    border-radius: 3px;
+    color: rgb(255 255 255 / 76%);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.side-nav-link:hover {
+    color: #fff;
+    background: rgb(255 255 255 / 5%);
+}
+
+.side-nav-link.active {
+    color: #fff;
+    background: var(--brand-sidebar-active);
+    border-left-color: var(--brand-sidebar-gold);
+    font-weight: 700;
+}
+
+body.side-nav-open { overflow: hidden; }
+
+/* Lotes em criação */
+.lotes-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+    margin: 18px 0;
+}
+
+.lotes-kpi {
+    min-width: 0;
+    padding: 18px;
+}
+
+.lotes-kpi .card-heading-row {
+    align-items: flex-start;
+}
+
+.lotes-kpi-label {
+    color: var(--muted-foreground);
+    font-size: .84rem;
+    font-weight: 650;
+}
+
+.lotes-kpi-value {
+    margin-top: 10px;
+    font-size: clamp(1.45rem, 2.6vw, 2.15rem);
+    line-height: 1;
+    font-weight: 760;
+    letter-spacing: -.04em;
+}
+
+.lotes-kpi-caption {
+    margin-top: 8px;
+    color: var(--muted-foreground);
+    font-size: .78rem;
+}
+
+.formula-mini-button {
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--secondary);
+    color: var(--foreground);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+.lotes-table-card {
+    overflow: hidden;
+}
+
+.lotes-table-wrap {
+    overflow: auto;
+    max-height: 62vh;
+}
+
+.lotes-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 1100px;
+}
+
+.lotes-table th,
+.lotes-table td {
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+    font-size: .83rem;
+}
+
+.lotes-table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--card);
+    color: var(--muted-foreground);
+    font-weight: 680;
+}
+
+.lotes-table tbody tr:hover td {
+    background: var(--secondary);
+}
+
+.lotes-age-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 54px;
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: var(--secondary);
+    font-weight: 650;
+}
+
+.formula-page-section + .formula-page-section {
+    margin-top: 34px;
+}
+
+.formula-section-header {
+    margin-bottom: 14px;
+}
+
+.formula-section-header h2 {
+    margin: 0 0 4px;
+}
+
+.formula-section-header p {
+    margin: 0;
+    color: var(--muted-foreground);
+}
+
+@media (max-width: 1300px) {
+    .lotes-kpi-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 780px) {
+    .side-nav-rail {
+        top: 12px;
+        bottom: auto;
+        min-height: 84px;
+    }
+
+    .lotes-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 520px) {
+    .lotes-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================
+   V7.11 - LOTES EM CRIAÇÃO / referência operacional
+   ========================================================== */
+.lotes-reference-page { font-family: "Geist", Inter, ui-sans-serif, system-ui, sans-serif; }
+.lotes-shell { width: min(1880px, calc(100% - 28px)); padding-top: 14px; }
+.lotes-compact-header { display:flex; align-items:center; justify-content:space-between; gap:18px; margin-bottom:12px; }
+.lotes-compact-header h1 { margin:4px 0 0; font-size:clamp(26px,2.2vw,36px); line-height:1; letter-spacing:-.04em; }
+.lotes-period-badge { display:flex; align-items:center; gap:9px; color:var(--primary); font-size:11px; font-weight:800; white-space:nowrap; }
+.lotes-period-badge strong { display:grid; place-items:center; min-width:29px; height:29px; padding:0 7px; border-radius:4px; background:var(--primary); color:#fff; font-size:14px; }
+.lotes-filter-strip { padding:10px 12px; border-radius:8px; }
+.lotes-filter-row { display:grid; grid-template-columns:repeat(6,minmax(132px,1fr)) auto; align-items:end; gap:12px; }
+.lotes-select-field { min-width:0; display:grid; gap:4px; }
+.lotes-select-field > span { color:var(--muted-foreground); font-size:10px; font-weight:720; }
+.lotes-select-field select { width:100%; height:34px; padding:0 34px 0 10px; border:1px solid var(--border); border-radius:5px; background:var(--card); color:var(--foreground); font-size:12px; outline:none; }
+.lotes-select-field select:focus { border-color:var(--primary); box-shadow:0 0 0 3px var(--ring); }
+.lotes-clear-button { height:34px; padding:0 14px; border:0; border-radius:5px; background:var(--primary); color:#fff; font-size:11px; font-weight:760; cursor:pointer; white-space:nowrap; box-shadow:var(--shadow-sm); }
+.lotes-clear-button:hover { background:var(--primary-2); }
+.lotes-reference-kpis { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; margin:14px 0; }
+.lotes-reference-kpi { position:relative; min-height:92px; padding:14px 15px; display:grid; grid-template-columns:42px 1fr; align-items:center; gap:12px; overflow:hidden; border-radius:8px; }
+.lotes-kpi-topline { position:absolute; inset:0 0 auto; height:2px; background:var(--accent); }
+.lotes-reference-icon { width:36px; height:36px; display:grid; place-items:center; border-radius:50%; background:var(--primary); color:#fff; }
+.lotes-reference-icon svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.lotes-reference-label { color:var(--muted-foreground); font-size:11px; font-weight:690; }
+.lotes-reference-value { margin-top:4px; font-size:clamp(21px,2vw,27px); line-height:1; font-weight:650; letter-spacing:-.025em; }
+.lotes-charts-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-bottom:14px; }
+.lotes-chart-card { padding:12px 14px 8px; border-radius:8px; overflow:hidden; }
+.lotes-chart-card header { min-height:38px; }
+.lotes-chart-card h2 { margin:0; color:var(--primary); font-size:13px; font-weight:760; }
+.chart-legend { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; color:var(--muted-foreground); font-size:10px; }
+.chart-legend span { display:inline-flex; align-items:center; gap:4px; }
+.dot { width:7px; height:7px; border-radius:999px; display:inline-block; }
+.dot-primary { background:var(--primary); }.dot-accent { background:var(--accent); }
+.lotes-chart { height:285px; width:100%; }
+.lotes-reference-table-card { padding:10px 12px 0; border-radius:8px; overflow:hidden; }
+.lotes-reference-table-wrap { max-height:285px; overflow:auto; border:1px solid var(--border); border-radius:6px; }
+.lotes-reference-table { min-width:980px; }
+.lotes-reference-table th,.lotes-reference-table td { padding:7px 9px; font-size:10.5px; }
+.lotes-reference-table thead th { position:sticky; top:0; z-index:3; background:color-mix(in srgb,var(--accent) 8%,var(--card)); color:var(--foreground); font-weight:760; }
+.lotes-reference-table tbody tr:nth-child(even) td { background:color-mix(in srgb,var(--secondary) 70%,transparent); }
+.lotes-reference-table .num { text-align:right; font-variant-numeric:tabular-nums; }
+.lotes-reference-table tfoot th { position:sticky; bottom:0; z-index:2; padding:7px 9px; background:var(--card); border-top:2px solid var(--border); font-size:10.5px; font-weight:800; }
+@media(max-width:1450px){.lotes-filter-row{grid-template-columns:repeat(3,minmax(150px,1fr)) auto}.lotes-clear-button{grid-column:auto}.lotes-charts-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.lotes-chart-card:last-child{grid-column:1/-1}.lotes-reference-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:900px){.lotes-filter-row{grid-template-columns:repeat(2,minmax(0,1fr))}.lotes-clear-button{grid-column:1/-1}.lotes-reference-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.lotes-charts-grid{grid-template-columns:1fr}.lotes-chart-card:last-child{grid-column:auto}.lotes-chart{height:270px}}
+@media(max-width:560px){.lotes-shell{width:min(100% - 18px,1880px);padding-top:12px}.lotes-compact-header{align-items:flex-start}.lotes-period-badge span{display:none}.lotes-filter-row{grid-template-columns:1fr}.lotes-reference-kpis{grid-template-columns:1fr}.lotes-reference-kpi{min-height:82px}.lotes-chart{height:250px}}
+
+/* ============================================================
+   V7.12 - FILTROS LOTES NO MESMO PADRAO DO DESEMPENHO
+   ============================================================ */
+.lotes-filter-card {
+    margin-top: 14px;
+}
+
+.lotes-page-filters {
+    grid-template-columns: repeat(6, minmax(150px, 1fr));
+}
+
+.lotes-page-filters .checkbox-multiselect-trigger {
+    min-height: 40px;
+}
+
+@media (max-width: 1300px) {
+    .lotes-page-filters {
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 780px) {
+    .lotes-page-filters {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* V7.13 - subtítulo informativo dos gráficos de lotes */
+.lotes-chart-card header > div:first-child { min-width: 0; }
+.lotes-chart-card .chart-subtitle {
+    margin: 3px 0 0;
+    color: var(--muted-foreground);
+    font-size: 11px;
+    line-height: 1.35;
+    font-weight: 500;
+}

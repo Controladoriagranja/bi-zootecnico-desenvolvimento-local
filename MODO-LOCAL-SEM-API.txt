@@ -1,0 +1,25 @@
+BI ZOOTÉCNICO — MODO LOCAL DE FRONTEND
+
+Esta versão foi preparada para desenvolvimento rápido abrindo os arquivos HTML diretamente pelo navegador (file://).
+
+NÃO É NECESSÁRIO:
+- FastAPI
+- Uvicorn
+- Docker
+- Python
+- servidor HTTP local
+- CDN para leitura de Parquet
+
+Os Parquets originais continuam na pasta data como fonte de referência.
+Para o navegador, os dados necessários desta versão já foram convertidos para JavaScript local:
+
+- data/base_dinamica_local.js
+- data/lotes_abertos_local.js
+
+Fluxo atual:
+index.html / detalhes.html -> base_dinamica_local.js -> local-parquet.js -> dashboard
+a lotes.html -> lotes_abertos_local.js -> local-parquet.js -> tela de lotes
+
+Os arquivos *_local.js foram gerados a partir dos Parquets incluídos nesta entrega.
+Se os Parquets forem atualizados futuramente, os arquivos *_local.js também precisam ser regenerados.
+Nesta fase de prototipação isso evita qualquer dependência de API ou servidor.

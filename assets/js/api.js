@@ -1,8 +1,7 @@
 /**
  * Cliente HTTP do BI Zootécnico.
  *
- * O navegador não lê mais Parquet. Todos os dados vêm da API local
- * publicada pelo Cloudflare Tunnel.
+ * O navegador recebe JSON da API selecionada em config.js.
  */
 async function apiGet(
     endpoint,
@@ -93,7 +92,7 @@ async function apiGet(
 
         throw new Error(
             "Não foi possível conectar à API do BI. "
-            + "Verifique se a FastAPI e o Cloudflare Tunnel estão ligados."
+            + "Verifique se a FastAPI está em execução na URL configurada."
         );
     }
 

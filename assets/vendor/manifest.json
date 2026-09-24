@@ -1,0 +1,53 @@
+{
+  "versoes": {
+    "echarts": "5.6.0",
+    "geist": "5.3.0"
+  },
+  "arquivos": [
+    {
+      "arquivo": "echarts/echarts.min.js",
+      "origem": "https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js",
+      "sha256": "bf4a223524e40b77c304bec67e1222cf551f14880cf42c69dc046558e11c07b1"
+    },
+    {
+      "arquivo": "echarts/LICENSE",
+      "origem": "https://cdn.jsdelivr.net/npm/echarts@5.6.0/LICENSE",
+      "sha256": "634293835b43a6dd2094fa39182a3d9a6b9ca43b7fdb9ac354e8037af2a3093a"
+    },
+    {
+      "arquivo": "geist/index.css",
+      "origem": "https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@5.3.0/index.css",
+      "sha256": "97fe28a6688629d5a016347a47282efabffc85e5dd49bd953217d048e47c6872"
+    },
+    {
+      "arquivo": "geist/LICENSE",
+      "origem": "https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@5.3.0/LICENSE",
+      "sha256": "71609cbb5c78b5870d712eab73a31d76622635c6ed034ab5cee3b9ecbda8685f"
+    },
+    {
+      "arquivo": "geist/files/geist-cyrillic-ext-wght-normal.woff2",
+      "origem": "https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@5.3.0/files/geist-cyrillic-ext-wght-normal.woff2",
+      "sha256": "2317fa4bb293c9c0b110e18315d529235c47a0ddd3338cea3d8c7955e927899e"
+    },
+    {
+      "arquivo": "geist/files/geist-cyrillic-wght-normal.woff2",
+      "origem": "https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@5.3.0/files/geist-cyrillic-wght-normal.woff2",
+      "sha256": "6894439694946a589d157ece003086960a6a4013d74a813dab7602efdb3d8c09"
+    },
+    {
+      "arquivo": "geist/files/geist-latin-ext-wght-normal.woff2",
+      "origem": "https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@5.3.0/files/geist-latin-ext-wght-normal.woff2",
+      "sha256": "824f485b5d26e2f2da3c2b236132ece1bc8e4e43373452950bb0e40548b4313f"
+    },
+    {
+      "arquivo": "geist/files/geist-latin-wght-normal.woff2",
+      "origem": "https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@5.3.0/files/geist-latin-wght-normal.woff2",
+      "sha256": "19f9c92546aa300c312235e3125af1b81394d8db9a4bc4a425cd5b641d2d54e1"
+    },
+    {
+      "arquivo": "geist/files/geist-vietnamese-wght-normal.woff2",
+      "origem": "https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@5.3.0/files/geist-vietnamese-wght-normal.woff2",
+      "sha256": "8fa40e5d248247735eb97a0bd593b8852440430600d6ba01364c31fe0abc1fe1"
+    }
+  ]
+}

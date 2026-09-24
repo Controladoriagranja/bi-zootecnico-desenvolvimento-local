@@ -7,7 +7,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <link rel="icon" href="data:,">
+    <link rel="icon" href="assets/img/favicon-granja.png">
 
     <title>Fórmulas - Desempenho Zootécnico</title>
 
@@ -27,12 +27,12 @@
 
     <link
         rel="stylesheet"
-        href="assets/css/app.css?v=7.5"
+        href="assets/css/app.css?v=7.6"
     >
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist/index.css">
+    <link rel="stylesheet" href="assets/vendor/geist/index.css">
 </head>
 
-<body>
+<body data-page="formulas">
 
 <div class="app-shell">
 
@@ -69,19 +69,31 @@
     </header>
 
 
-    <section
-        id="formulaContainer"
-        class="formula-grid"
-    ></section>
+    <section class="formula-page-section" id="desempenho">
+        <div class="formula-section-header">
+            <h2>Desempenho Zootécnico</h2>
+            <p>Métricas da base dinâmica de lotes abatidos.</p>
+        </div>
+        <div id="formulaContainer" class="formula-grid"></div>
+    </section>
+
+    <section class="formula-page-section" id="lotes-em-criacao">
+        <div class="formula-section-header">
+            <h2>Lotes em Criação</h2>
+            <p>Métricas dos lotes abertos no snapshot mais recente, limitados a 45 dias.</p>
+        </div>
+        <div id="formulaLotesContainer" class="formula-grid"></div>
+    </section>
 
 </div>
 
 
-<script src="assets/js/config.js?v=7.5"></script>
-<script src="assets/js/metrics.js?v=7.5"></script>
-<script src="assets/js/api.js?v=7.5"></script>
-<script src="assets/js/theme.js?v=7.5"></script>
-<script src="assets/js/formulas.js?v=7.5"></script>
+<script src="assets/js/config.js?v=7.6"></script>
+<script src="assets/js/metrics.js?v=7.6"></script>
+<script src="assets/js/lotes-formulas.js?v=7.8"></script>
+<script src="assets/js/theme.js?v=7.6"></script>
+<script src="assets/js/formulas.js?v=7.8"></script>
 
+<script src="assets/js/sidebar.js?v=7.6"></script>
 </body>
 </html>

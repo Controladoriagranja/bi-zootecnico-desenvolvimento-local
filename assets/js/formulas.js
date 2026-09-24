@@ -1,138 +1,21 @@
 function escapeHtml(texto) {
-    return String(texto || "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;");
+    return String(texto || "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
-
-
-async function carregarFormulas() {
-    const container =
-        document.getElementById(
-            "formulaContainer"
-        );
-
-    try {
-        const resposta =
-            await apiGet(
-                APP_CONFIG
-                    .endpoints
-                    .formulas
-            );
-
-        container.innerHTML = "";
-
-        resposta.metricas.forEach(
-            metrica => {
-                const card =
-                    document.createElement(
-                        "article"
-                    );
-
-                card.className =
-                    "formula-card";
-
-                const regra =
-                    metrica.regra_adicional
-                        ? `
-                            <div class="notice">
-                                <strong>
-                                    Regra adicional
-                                </strong>
-
-                                <p>
-                                    ${
-                                        metrica
-                                            .regra_adicional
-                                            .descricao
-                                    }
-                                </p>
-                            </div>
-                        `
-                        : "";
-
-                card.innerHTML = `
-                    <div class="formula-title">
-                        <h2>
-                            ${metrica.nome}
-                        </h2>
-
-                        <span>
-                            ${metrica.id}
-                        </span>
-                    </div>
-
-                    <div class="formula-section">
-                        <strong>
-                            Fórmula
-                        </strong>
-
-                        <div class="code-inline">
-                            ${
-                                metrica
-                                    .formula_exibicao
-                            }
-                        </div>
-                    </div>
-
-                    <div class="formula-section">
-                        <strong>
-                            Descrição
-                        </strong>
-
-                        <p>
-                            ${metrica.descricao || ""}
-                        </p>
-                    </div>
-
-                    ${
-                        metrica.ponderador
-                            ? `
-                                <div class="formula-section">
-                                    <strong>
-                                        Ponderação
-                                    </strong>
-
-                                    <p>
-                                        ${metrica.ponderador}
-                                    </p>
-                                </div>
-                            `
-                            : ""
-                    }
-
-                    ${regra}
-
-                    <details class="code-details">
-                        <summary>
-                            Ver DAX original
-                        </summary>
-
-                        <pre><code>${
-                            escapeHtml(
-                                metrica.formula_dax
-                            )
-                        }</code></pre>
-                    </details>
-                `;
-
-                container.appendChild(
-                    card
-                );
-            }
-        );
-    }
-    catch (error) {
-        container.innerHTML = `
-            <div class="alert alert-error">
-                ${
-                    error.message
-                    || "Não foi possível carregar as fórmulas."
-                }
-            </div>
-        `;
-    }
+function renderFormulaCards(container, metricas) {
+    container.innerHTML = "";
+    metricas.forEach(metrica => {
+        const card = document.createElement("article");
+        card.className = "formula-card";
+        const regra = metrica.regra_adicional ? `<div class="notice"><strong>Regra adicional</strong><p>${metrica.regra_adicional.descricao}</p></div>` : "";
+        card.innerHTML = `<div class="formula-title"><h2>${metrica.nome}</h2><span>${metrica.id}</span></div><div class="formula-section"><strong>Fórmula</strong><div class="code-inline">${metrica.formula_exibicao}</div></div><div class="formula-section"><strong>Descrição</strong><p>${metrica.descricao || ""}</p></div>${metrica.ponderador ? `<div class="formula-section"><strong>Ponderação</strong><p>${metrica.ponderador}</p></div>` : ""}${regra}<details class="code-details"><summary>Ver DAX de referência</summary><pre><code>${escapeHtml(metrica.formula_dax)}</code></pre></details>`;
+        container.appendChild(card);
+    });
 }
-
-
-carregarFormulas();
+renderFormulaCards(document.getElementById("formulaContainer"), (window.BI_METRIC_ORDER || []).map(id => window.METRICAS[id]));
+renderFormulaCards(document.getElementById("formulaLotesContainer"), window.FORMULAS_LOTES || [
+    {id:"lotes_criacao",nome:"Lotes em criação",formula_exibicao:"Contagem dos lotes únicos recebidos nos últimos 45 dias, pela Data Recepcao",descricao:"Quantidade de lotes únicos cuja Data Recepcao está dentro da janela móvel dos últimos 45 dias; abertos e fechados são combinados para completar as idades semanais.",formula_dax:"lotes_em_criacao = DISTINCTCOUNT(base[Chave_Lote_Granja])"},
+    {id:"aves_alojadas",nome:"Aves Alojadas",formula_exibicao:"Σ(Aves Inicia) dos lotes recebidos nos últimos 45 dias",descricao:"Soma das aves iniciais dos lotes na janela de 45 dias definida pela Data Recepcao.",formula_dax:"aves_alojadas = SUMX(VALUES(base[Chave_Lote_Granja]), MAX(base[Aves Inicia]))"},
+    {id:"aves_atuais",nome:"Aves Atuais",formula_exibicao:"Aves Inicia − Σ(Mortes 07–42) − Σ(Descartes 07–42)",descricao:"Estimativa de animais vivos até 45 dias.",formula_dax:"aves_atuais = [Aves Alojadas] - [Mortes 07-42] - [Descartes 07-42]"},
+    {id:"mortalidade",nome:"% Mortalidade",formula_exibicao:"Σ(Mortes + Descartes 07–42) / Σ(Aves Inicia) × 100",descricao:"Percentual de perdas no período, considerando M + D (mortes + descartes) nas idades semanais disponíveis.",formula_dax:"mortalidade = DIVIDE([Mortes 07-42] + [Descartes 07-42], [Aves Alojadas]) * 100"},
+    {id:"peso_medio",nome:"Peso Médio",formula_exibicao:"Σ(Último peso disponível × Aves Atuais) / Σ(Aves Atuais)",descricao:"Usa o peso semanal mais recente disponível entre 42 e 7 dias; na ausência, usa Ps Pinto.",ponderador:"Aves Atuais",formula_dax:"peso_medio = DIVIDE(SUMX(base, [Último Peso] * [Aves Atuais]), SUMX(base, [Aves Atuais]))"}
+]);
