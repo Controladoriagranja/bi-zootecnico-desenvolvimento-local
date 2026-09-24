@@ -44,7 +44,7 @@
         if (!raw.length) throw new Error("A base local dos últimos 45 dias não foi carregada.");
 
         // A janela desta tela é definida exclusivamente por Data Recepcao.
-        // O arquivo local já combina lotes abertos + fechados e mantém, para cada lote/galpão,
+        // A tela usa exclusivamente lotes abertos. A base local mantém, para cada lote/galpão,
         // o registro mais recente disponível dentro dos últimos 45 dias de recepção.
         const receptionDates = raw.map(row => date(row["Data Recepcao"])).filter(Boolean);
         const latest = new Date(Math.max(...receptionDates.map(d => d.getTime())));
