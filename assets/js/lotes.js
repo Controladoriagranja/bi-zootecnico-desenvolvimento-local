@@ -125,26 +125,24 @@
     return mortes + descartes;
   }
 
-  function mortalityThrough(row, limit) {
-    let total = 0;
-    WEEKS.forEach((week) => {
-      if (week <= limit && week <= row.idade)
-        total += mortalityAtWeek(row, week);
-    });
-    return total;
+  function mortalitySelected(row) {
+    return selectedWeeks().reduce(
+      (total, week) => total + (week <= row.idade ? mortalityAtWeek(row, week) : 0),
+      0,
+    );
   }
 
-  function latestWeight(row, limit = 45) {
-    const maxAge = Math.min(row.idade, limit);
-    for (const week of [...WEEKS].reverse()) {
-      if (week <= maxAge) {
+  function latestWeight(row) {
+    // Peso da última semana selecionada disponível para o lote.
+    for (const week of [...selectedWeeks()].reverse()) {
+      if (week <= row.idade) {
         const value = num(
           row.source[`Peso Med.-${String(week).padStart(2, "0")}`],
         );
         if (value !== null) return value;
       }
     }
-    return num(row.source["Ps Pinto"]);
+    return hasWeekSelection() ? null : num(row.source["Ps Pinto"]);
   }
 
   const FILTER_FIELDS = [
@@ -156,16 +154,6 @@
     { id: "tecnico", apiKey: "tecnico", multi: true, search: true },
     { id: "mistLinha", apiKey: "mist_linha", multi: true },
   ];
-  const AGE_RANGES = [
-    { value: "0-7", label: "0–7 dias", min: 0, max: 7 },
-    { value: "8-14", label: "8–14 dias", min: 8, max: 14 },
-    { value: "15-21", label: "15–21 dias", min: 15, max: 21 },
-    { value: "22-28", label: "22–28 dias", min: 22, max: 28 },
-    { value: "29-35", label: "29–35 dias", min: 29, max: 35 },
-    { value: "36-42", label: "36–42 dias", min: 36, max: 42 },
-    { value: "43-45", label: "43–45 dias", min: 43, max: 45 },
-  ];
-
   function selectedFilters() {
     return state.filters ? state.filters.values() : {};
   }
@@ -174,19 +162,22 @@
     return !selected?.length || selected.includes(String(value));
   }
 
-  function ageMatches(age, selected) {
-    if (!selected?.length) return true;
-    return selected.some((value) => {
-      const range = AGE_RANGES.find((item) => item.value === value);
-      return range && age >= range.min && age <= range.max;
-    });
+  function selectedWeeks() {
+    const selected = selectedFilters().periodo_dias;
+    return selected?.length
+      ? WEEKS.filter(week => selected.includes(String(week)))
+      : WEEKS;
+  }
+
+  function hasWeekSelection() {
+    return selectedWeeks().length !== WEEKS.length;
   }
 
   function filteredRows() {
     const f = selectedFilters();
     return state.raw.filter(
       (row) =>
-        ageMatches(row.idade, f.periodo_dias) &&
+        (!hasWeekSelection() || selectedWeeks().some(week => row.idade >= week)) &&
         includesSelected(f.tipo_granja, row.tipo_granja) &&
         includesSelected(f.modelo, row.modelo) &&
         includesSelected(f.galpao, row.galpao) &&
@@ -211,7 +202,7 @@
     state.filters.register();
 
     const optionMap = {
-      periodo_dias: AGE_RANGES.map(({ value, label }) => ({ value, label })),
+      periodo_dias: WEEKS.map(week => ({ value: String(week), label: `${week} dias` })),
       tipo_granja: uniqueOptions(state.raw.map((row) => row.tipo_granja)),
       modelo: uniqueOptions(state.raw.map((row) => row.modelo)),
       galpao: uniqueOptions(state.raw.map((row) => row.galpao)),
@@ -232,14 +223,13 @@
   }
 
   function totals(rows) {
-    const limit = 45;
     const aves = rows.reduce((sum, row) => sum + row.aves, 0);
     const mortes = rows.reduce(
-      (sum, row) => sum + mortalityThrough(row, limit),
+      (sum, row) => sum + mortalitySelected(row),
       0,
     );
     const weights = rows
-      .map((row) => latestWeight(row, limit))
+      .map((row) => latestWeight(row))
       .filter((value) => value !== null);
     return {
       lotes: rows.length,
@@ -269,7 +259,7 @@
       ["aves", "Aves Alojadas", fmt(t.aves), ""],
       ["mort", "Mortalidade no Período (Qtde)", fmt(t.mortes), ""],
       ["percent", "Mortalidade no Período (%)", fmt(t.mortalidade, 2), "%"],
-      ["peso", "Peso Médio Atual", fmt(t.peso, 2), ""],
+      ["peso", hasWeekSelection() ? "Peso Médio no Período" : "Peso Médio Atual", fmt(t.peso, 2), ""],
     ];
     $("cardsLotes").innerHTML = cards
       .map(
@@ -280,7 +270,7 @@
   }
 
   function weeklyData(rows) {
-    return WEEKS.map((week) => {
+    return selectedWeeks().map((week) => {
       // Cada ponto usa diretamente a coluna da idade correspondente:
       // Peso Med.-07, Peso Med.-14 ... e Mortalidade = Mortes + Descartes da mesma semana.
       const eligible = rows.filter((row) => row.idade >= week);
@@ -480,7 +470,7 @@
     );
 
     const growthPoints = [
-      {
+      ...(!hasWeekSelection() ? [{
         week: 0,
         label: "0",
         value: (() => {
@@ -489,7 +479,7 @@
             .filter((v) => v !== null);
           return ps.length ? ps.reduce((a, b) => a + b, 0) / ps.length : null;
         })(),
-      },
+      }] : []),
       ...weekly.map((x) => ({
         week: x.week,
         label: String(x.week),
@@ -552,7 +542,6 @@
   }
 
   function aggregateTable(rows) {
-    const limit = 45;
     const groups = new Map();
     rows.forEach((row) => {
       const key = [row.tipo_granja, row.produtor, row.linhagem].join("||");
@@ -567,8 +556,8 @@
         });
       const g = groups.get(key);
       g.aves += row.aves;
-      g.mortes += mortalityThrough(row, limit);
-      const w = latestWeight(row, limit);
+      g.mortes += mortalitySelected(row);
+      const w = latestWeight(row);
       if (w !== null) g.weights.push(w);
     });
     return [...groups.values()].map((g) => ({
