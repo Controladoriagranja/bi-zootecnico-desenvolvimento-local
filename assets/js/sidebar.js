@@ -4,6 +4,7 @@
     const items = [
         { id: "desempenho", label: "Desempenho", href: "index.html" },
         { id: "lotes", label: "Lotes em criação", href: "lotes.html" },
+        { id: "diferenca-abate", label: "Diferença de aves abatidas", href: "diferenca-aves-abatidas.html" },
         { id: "formulas", label: "Fórmulas", href: "formulas.html" }
     ];
 

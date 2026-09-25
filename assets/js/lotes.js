@@ -132,22 +132,34 @@
     );
   }
 
-  function latestWeight(row) {
-    // Peso da última semana selecionada disponível para o lote.
-    for (const week of [...selectedWeeks()].reverse()) {
-      if (week <= row.idade) {
-        const value = num(
-          row.source[`Peso Med.-${String(week).padStart(2, "0")}`],
-        );
-        if (value !== null) return value;
-      }
-    }
-    return hasWeekSelection() ? null : num(row.source["Ps Pinto"]);
+  function weeklyWeightMean(rows, week) {
+    const column = `Peso Med.-${String(week).padStart(2, "0")}`;
+    const values = rows
+      .filter((row) => row.idade >= week)
+      .map((row) => num(row.source[column]))
+      .filter((value) => value !== null);
+    return values.length
+      ? values.reduce((sum, value) => sum + value, 0) / values.length
+      : null;
+  }
+
+  function generalWeightMean(rows) {
+    // 1) calcula a média de cada coluna semanal selecionada;
+    // 2) soma essas médias;
+    // 3) divide pela quantidade de semanas com média válida.
+    // `rows` já contém todos os filtros ativos da tela.
+    const weeklyMeans = selectedWeeks()
+      .map((week) => weeklyWeightMean(rows, week))
+      .filter((value) => value !== null);
+    return weeklyMeans.length
+      ? weeklyMeans.reduce((sum, value) => sum + value, 0) / weeklyMeans.length
+      : null;
   }
 
   const FILTER_FIELDS = [
     { id: "periodoDias", apiKey: "periodo_dias", multi: true },
     { id: "tipoGranja", apiKey: "tipo_granja", multi: true, search: true },
+    { id: "produtor", apiKey: "produtor", multi: true, search: true },
     { id: "modelo", apiKey: "modelo", multi: true, search: true },
     { id: "galpao", apiKey: "galpao", multi: true, search: true },
 
@@ -179,6 +191,7 @@
       (row) =>
         (!hasWeekSelection() || selectedWeeks().some(week => row.idade >= week)) &&
         includesSelected(f.tipo_granja, row.tipo_granja) &&
+        includesSelected(f.produtor, row.produtor) &&
         includesSelected(f.modelo, row.modelo) &&
         includesSelected(f.galpao, row.galpao) &&
         includesSelected(f.tecnico, row.tecnico) &&
@@ -204,6 +217,7 @@
     const optionMap = {
       periodo_dias: WEEKS.map(week => ({ value: String(week), label: `${week} dias` })),
       tipo_granja: uniqueOptions(state.raw.map((row) => row.tipo_granja)),
+      produtor: uniqueOptions(state.raw.map((row) => row.produtor)),
       modelo: uniqueOptions(state.raw.map((row) => row.modelo)),
       galpao: uniqueOptions(state.raw.map((row) => row.galpao)),
       tecnico: uniqueOptions(state.raw.map((row) => row.tecnico)),
@@ -228,17 +242,12 @@
       (sum, row) => sum + mortalitySelected(row),
       0,
     );
-    const weights = rows
-      .map((row) => latestWeight(row))
-      .filter((value) => value !== null);
     return {
       lotes: rows.length,
       aves,
       mortes,
       mortalidade: aves ? (mortes / aves) * 100 : null,
-      peso: weights.length
-        ? weights.reduce((a, b) => a + b, 0) / weights.length
-        : null,
+      peso: generalWeightMean(rows),
     };
   }
 
@@ -259,12 +268,13 @@
       ["aves", "Aves Alojadas", fmt(t.aves), ""],
       ["mort", "Mortalidade no Período (Qtde)", fmt(t.mortes), ""],
       ["percent", "Mortalidade no Período (%)", fmt(t.mortalidade, 2), "%"],
-      ["peso", hasWeekSelection() ? "Peso Médio no Período" : "Peso Médio Atual", fmt(t.peso, 2), ""],
+      ["peso", "Peso Médio Geral", fmt(t.peso, 2), ""],
     ];
+    const formulaIds = { lotes: "lotes_criacao", aves: "aves_alojadas", mort: "mortalidade_qtde", percent: "mortalidade", peso: "peso_medio" };
     $("cardsLotes").innerHTML = cards
       .map(
         ([icon, label, value, suffix]) =>
-          `<article class="card lotes-reference-kpi"><span class="lotes-kpi-topline"></span><div class="lotes-reference-icon">${ICONS[icon]}</div><div><div class="lotes-reference-label">${label}</div><div class="lotes-reference-value">${value}${suffix}</div></div></article>`,
+          `<article class="card lotes-reference-kpi"><span class="lotes-kpi-topline"></span><div class="lotes-reference-icon">${ICONS[icon]}</div><div><div class="lotes-reference-label">${label}</div><div class="lotes-reference-value">${value}${suffix}</div></div><button class="mini-button lotes-formula-button" type="button" data-lotes-formula="${formulaIds[icon]}" title="Ver fórmula" aria-label="Ver fórmula: ${label}"><span class="formula-fx">ƒx</span></button></article>`,
       )
       .join("");
   }
@@ -279,19 +289,16 @@
         0,
       );
       const aves = eligible.reduce((sum, row) => sum + row.aves, 0);
+      const column = `Peso Med.-${String(week).padStart(2, "0")}`;
       const weights = eligible
-        .map((row) =>
-          num(row.source[`Peso Med.-${String(week).padStart(2, "0")}`]),
-        )
+        .map((row) => num(row.source[column]))
         .filter((value) => value !== null);
       return {
         week,
         label: `${week} dias`,
         deaths,
         mortality: aves ? (deaths / aves) * 100 : null,
-        weight: weights.length
-          ? weights.reduce((a, b) => a + b, 0) / weights.length
-          : null,
+        weight: weeklyWeightMean(rows, week),
         weightCount: weights.length,
         eligibleCount: eligible.length,
       };
@@ -439,16 +446,19 @@
       true,
     );
 
+    // No gráfico de peso, não exiba semanas sem nenhum Peso Med.-XX válido.
+    // Ex.: se Peso Med.-42 estiver totalmente vazio, o rótulo "42 dias" também some.
+    const weeklyWeight = weekly.filter((item) => item.weight !== null);
     const weight = getChart("chartPesoSemanal");
     weight.setOption(
       {
         ...base,
-        xAxis: { ...base.xAxis, data: weekly.map((x) => x.label) },
+        xAxis: { ...base.xAxis, data: weeklyWeight.map((x) => x.label) },
         series: [
           {
-            name: "Peso Médio",
+            name: "Média da Coluna",
             type: "bar",
-            data: weekly.map((x) => x.weight),
+            data: weeklyWeight.map((x) => x.weight),
             tooltip: {
               valueFormatter: (value) => (value == null ? "—" : fmt(value, 2)),
             },
@@ -552,20 +562,17 @@
           linhagem: row.linhagem,
           aves: 0,
           mortes: 0,
-          weights: [],
+          rows: [],
         });
       const g = groups.get(key);
       g.aves += row.aves;
       g.mortes += mortalitySelected(row);
-      const w = latestWeight(row);
-      if (w !== null) g.weights.push(w);
+      g.rows.push(row);
     });
     return [...groups.values()].map((g) => ({
       ...g,
       mortalidade: g.aves ? (g.mortes / g.aves) * 100 : null,
-      peso: g.weights.length
-        ? g.weights.reduce((a, b) => a + b, 0) / g.weights.length
-        : null,
+      peso: generalWeightMean(g.rows),
     }));
   }
 
@@ -646,10 +653,47 @@
     render();
   }
 
+  function setupFormulaModal() {
+    const modal = $("formulaModalLotes");
+    const close = $("formulaFecharLotes");
+    let opener = null;
+    let previousOverflow = "";
+    function hide() {
+      if (modal.classList.contains("hidden")) return;
+      modal.classList.add("hidden");
+      document.body.style.overflow = previousOverflow;
+      opener?.focus({ preventScroll: true });
+    }
+    document.addEventListener("click", event => {
+      const button = event.target.closest("[data-lotes-formula]");
+      if (!button) return;
+      const metric = buildLotesFormulas(selectedWeeks(), hasWeekSelection()).find(item => item.id === button.dataset.lotesFormula);
+      if (!metric) return;
+      opener = button;
+      $("formulaTituloLotes").textContent = metric.nome;
+      $("formulaExpressaoLotes").textContent = metric.formula_exibicao;
+      $("formulaDescricaoLotes").textContent = metric.descricao;
+      $("formulaExplicacaoLotes").innerHTML = FormulaUI.explanation(metric);
+      previousOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      modal.classList.remove("hidden");
+      modal.querySelector(".dialog-card").scrollTop = 0;
+      close.focus({ preventScroll: true });
+    });
+    close.addEventListener("click", hide);
+    $("formulaBackdropLotes").addEventListener("click", hide);
+    document.addEventListener("keydown", event => {
+      if (modal.classList.contains("hidden")) return;
+      if (event.key === "Escape") { event.preventDefault(); hide(); }
+      if (event.key === "Tab") { event.preventDefault(); close.focus({ preventScroll: true }); }
+    });
+  }
+
   function init() {
     try {
       prepareRows();
       setupFilters();
+      setupFormulaModal();
       state.resizeObserver =
         typeof ResizeObserver !== "undefined"
           ? new ResizeObserver((entries) =>

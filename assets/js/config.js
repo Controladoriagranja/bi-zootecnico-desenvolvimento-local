@@ -1,15 +1,19 @@
 // Desenvolvimento local. A URL anterior permanece disponível para uso futuro.
-const APP_ENV = "local";
+const APP_ENV = "offline"; // offline: sem API; local: FastAPI; tunnel: produção
 const API_URLS = {
+    offline: "",
     local: "http://127.0.0.1:8001",
     tunnel: "https://task-uses-vector-productivity.trycloudflare.com"
 };
 
 const APP_CONFIG = {
-    mode: `api-${APP_ENV}`,
+    mode: APP_ENV === "offline" ? "offline" : `api-${APP_ENV}`,
     API_URL: API_URLS[APP_ENV],
 
     endpoints: {
+        rxp: "/api/zootecnico/rxp",
+        rxpFiltros: "/api/zootecnico/rxp/filtros",
+        rxpFormulas: "/api/zootecnico/rxp/formulas",
         health:
             "/api/health",
         info:

@@ -115,7 +115,7 @@ DIVIDE(
     },
     "peso_medio": {
         "id": "peso_medio",
-        "nome": "Peso Médio",
+        "nome": "Peso Médio Ponderado",
         "coluna": "Peso Médio",
         "unidade": "",
         "tipo_calculo": "media_ponderada",
@@ -130,7 +130,7 @@ DIVIDE(
     ),
     SUM(base_dinamica_tratado[Aves Abatidas])
 )""",
-        "descricao": "Peso médio ponderado pelas Aves Abatidas."
+        "descricao": "Média ponderada da coluna [Peso Médio] da base de desempenho, usando [Aves Abatidas] como peso. Não utiliza as colunas semanais [Peso Med.-07] a [Peso Med.-42]."
     },
     "vazio": {
         "id": "vazio",

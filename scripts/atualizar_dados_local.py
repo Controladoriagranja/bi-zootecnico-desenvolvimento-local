@@ -3,6 +3,7 @@ from pathlib import Path
 import sys
 
 import pandas as pd
+from gerar_rxp_local import preparar_rxp
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE_COLUMNS = [
@@ -40,6 +41,7 @@ def preparar_dados(pasta):
 def main():
     # Valida os dois Parquets antes de substituir qualquer arquivo da tela.
     preparados = preparar_dados(ROOT / "data")
+    preparados.extend(preparar_rxp())
     for destino, conteudo, linhas in preparados:
         temporario = destino.with_suffix(destino.suffix + ".tmp")
         try:

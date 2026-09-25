@@ -732,6 +732,8 @@ function abrirFormula(metricId) {
         return;
     }
 
+    document.getElementById("formulaModalExplicacao").innerHTML = FormulaUI.explanation(metric);
+
     document
         .getElementById(
             "formulaModalTitulo"

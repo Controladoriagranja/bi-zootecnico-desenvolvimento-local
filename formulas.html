@@ -27,7 +27,7 @@
 
     <link
         rel="stylesheet"
-        href="assets/css/app.css?v=7.14"
+        href="assets/css/app.css?v=7.18"
     >
     <link rel="stylesheet" href="assets/vendor/geist/index.css">
 </head>
@@ -80,20 +80,28 @@
     <section class="formula-page-section" id="lotes-em-criacao">
         <div class="formula-section-header">
             <h2>Lotes em Criação</h2>
-            <p>Métricas dos lotes abertos no snapshot mais recente, limitados a 45 dias.</p>
+            <p>Lotes recebidos nos últimos 45 dias; versão mais recente de cada lote/galpão e semanas de 7 a 42 dias.</p>
         </div>
         <div id="formulaLotesContainer" class="formula-grid"></div>
     </section>
 
+    <section class="formula-page-section" id="rxp">
+        <div class="formula-section-header"><h2>Diferença de Aves Abatidas</h2><p>Quantidades de origem e vínculo com o último técnico do produtor.</p></div>
+        <div id="formulaRxpContainer" class="formula-grid"></div>
+    </section>
 </div>
 
 
-<script src="assets/js/config.js?v=7.6"></script>
-<script src="assets/js/metrics.js?v=7.6"></script>
-<script src="assets/js/lotes-formulas.js?v=7.8"></script>
+<script src="assets/js/config.js?v=7.25"></script>
+<script src="assets/js/metrics.js?v=7.21"></script>
+<script src="assets/js/formula-ui.js?v=7.18"></script>
+<script src="assets/js/lotes-formulas.js?v=7.21"></script>
 <script src="assets/js/theme.js?v=7.6"></script>
-<script src="assets/js/formulas.js?v=7.8"></script>
+<script src="assets/js/rxp-formulas.js?v=7.25"></script>
+<script src="assets/js/api.js?v=7.25"></script>
+<script src="assets/js/local-parquet.js?v=7.25"></script>
+<script src="assets/js/formulas.js?v=7.25"></script>
 
-<script src="assets/js/sidebar.js?v=7.14"></script>
+<script src="assets/js/sidebar.js?v=7.24"></script>
 </body>
 </html>

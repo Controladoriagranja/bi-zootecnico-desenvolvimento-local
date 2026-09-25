@@ -2126,7 +2126,6 @@ body.side-nav-open {
    V7.11 - LOTES EM CRIAÇÃO / referência operacional
    ========================================================== */
 .lotes-reference-page {
-  font-family: "Geist", Inter, ui-sans-serif, system-ui, sans-serif;
 }
 .lotes-shell {
   width: min(1880px, calc(100% - 28px));
@@ -2432,7 +2431,7 @@ body.side-nav-open {
 }
 
 .lotes-page-filters {
-  grid-template-columns: repeat(6, minmax(150px, 1fr));
+  grid-template-columns: repeat(7, minmax(140px, 1fr));
 }
 
 .lotes-page-filters .checkbox-multiselect-trigger {
@@ -2569,3 +2568,338 @@ body.side-nav-open {
     font-size: 10px;
   }
 }
+
+/* Fórmulas legíveis no desktop e no telefone. */
+.dashboard-grid > .metric-card-wide { grid-column: 1 / -1; }
+.formula-disclosure { min-width: 0; padding: 0; align-self: start; scroll-margin-top: 20px; }
+.formula-disclosure > summary { padding: 14px 16px; min-height: 48px; cursor: pointer; color: var(--primary); font-weight: 650; font-size: 14px; overflow-wrap: anywhere; }
+.formula-content { padding: 0 16px 16px; min-width: 0; }
+.formula-content p, .formula-explanation { font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.formula-explanation h3 { font-size: 13px; margin: 14px 0 6px; }
+.formula-explanation ol { padding-left: 22px; margin: 6px 0; }
+.formula-explanation li + li { margin-top: 6px; }
+.formula-columns { display: flex; flex-wrap: wrap; gap: 6px; }
+.formula-columns code { padding: 3px 6px; border-radius: 5px; background: var(--muted); max-width: 100%; overflow-wrap: anywhere; white-space: normal; }
+.formula-content .code-inline, .dialog-body .code-inline { white-space: pre-wrap; overflow-wrap: anywhere; word-break: normal; font-size: 13px; line-height: 1.6; }
+.formula-content pre, .dialog-body pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.lotes-formula-section { margin-top: 16px; }
+.lotes-formula-section h2 { font-size: 18px; color: var(--primary); }
+.lotes-formula-section > p { font-size: 14px; color: var(--muted-foreground); }
+.lotes-reference-kpi { position: relative; padding-right: 48px; }
+.lotes-reference-kpi .formula-mini-button { position: absolute; top: 6px; right: 6px; min-width: 36px; min-height: 36px; display: inline-flex; align-items: center; justify-content: center; }
+.lotes-chart-card .formula-chart-link { display: inline-flex; align-items: center; min-height: 36px; margin-top: 4px; }
+#formulaIndicador { margin-top: 14px; }
+@media (max-width: 780px) {
+  .formula-grid { grid-template-columns: minmax(0, 1fr); }
+  .formula-disclosure > summary { min-height: 48px; }
+  .lotes-reference-kpi .formula-mini-button { min-width: 44px; min-height: 44px; }
+  .lotes-reference-kpi { padding-right: 56px; }
+  .formula-chart-link { min-height: 44px !important; }
+  .dialog-card { width: min(100%, 680px); max-width: 100%; }
+}
+
+/* Fórmulas de Lotes: os mesmos botões e painel do index. */
+.lotes-reference-kpi .lotes-formula-button { position: absolute; top: 6px; right: 6px; }
+.lotes-chart-card > header { position: relative; padding-right: 42px; }
+.lotes-chart-card > header .lotes-formula-button { position: absolute; top: 0; right: 0; }
+@media (max-width: 780px) {
+  .lotes-formula-button, #formulaFecharLotes { min-width: 44px; min-height: 44px; }
+  .lotes-chart-card > header { padding-right: 52px; min-height: 44px; }
+}
+
+/* ============================================================
+   V7.24 - DIFERENÇA DE AVES ABATIDAS / protótipo visual
+   ============================================================ */
+.abate-page {
+}
+
+.abate-page-filters {
+  grid-template-columns: repeat(7, minmax(135px, 1fr));
+}
+
+.abate-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.abate-kpi-card {
+  position: relative;
+  min-height: 112px;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.abate-kpi-accent {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: var(--accent);
+}
+
+.abate-kpi-label {
+  color: var(--muted-foreground);
+  font-size: 10px;
+  font-weight: 760;
+}
+
+.abate-kpi-value {
+  display: block;
+  margin-top: 8px;
+  font-size: clamp(24px, 2.4vw, 34px);
+  line-height: 1;
+  font-weight: 760;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.abate-kpi-card small {
+  display: block;
+  margin-top: 9px;
+  color: var(--muted-foreground);
+  font-size: 9px;
+}
+
+.abate-kpi-diff.is-negative .abate-kpi-accent {
+  background: var(--destructive);
+}
+
+.abate-kpi-diff.is-negative .abate-kpi-value {
+  color: var(--destructive);
+}
+
+.abate-kpi-diff.is-positive .abate-kpi-accent {
+  background: var(--accent);
+}
+
+.abate-kpi-diff.is-positive .abate-kpi-value {
+  color: var(--accent);
+}
+
+.abate-kpi-diff.is-zero .abate-kpi-value {
+  color: var(--muted-foreground);
+}
+
+.abate-table-card {
+  padding: 15px;
+  overflow: hidden;
+}
+
+.abate-section-heading {
+  margin-bottom: 12px;
+}
+
+.abate-section-heading strong {
+  color: var(--primary);
+}
+
+.abate-table-wrap {
+  width: 100%;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  scrollbar-width: thin;
+}
+
+.abate-table {
+  width: 100%;
+  min-width: 880px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 10.5px;
+}
+
+.abate-table th,
+.abate-table td {
+  padding: 10px 11px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+.abate-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: color-mix(in srgb, var(--accent) 8%, var(--card));
+  color: var(--foreground);
+  font-size: 9.5px;
+  font-weight: 780;
+}
+
+.abate-table .num {
+  text-align: right;
+}
+
+.abate-table .action {
+  width: 1%;
+  text-align: center;
+}
+
+.abate-table tbody tr:hover td {
+  background: var(--secondary);
+}
+
+.abate-table tfoot th {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: var(--card);
+  border-top: 2px solid var(--border);
+  border-bottom: 0;
+  font-weight: 800;
+}
+
+.abate-diff-heading {
+  color: var(--primary) !important;
+}
+
+.abate-diff-pill {
+  display: inline-flex;
+  min-width: 68px;
+  justify-content: flex-end;
+  padding: 4px 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--secondary);
+  font-weight: 800;
+}
+
+.abate-diff-pill.is-negative,
+.abate-summary-diff.is-negative {
+  color: var(--destructive);
+}
+
+.abate-diff-pill.is-negative {
+  border-color: color-mix(in srgb, var(--destructive) 28%, var(--border));
+  background: color-mix(in srgb, var(--destructive) 8%, var(--card));
+}
+
+.abate-diff-pill.is-positive,
+.abate-summary-diff.is-positive {
+  color: var(--accent);
+}
+
+.abate-diff-pill.is-positive {
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--border));
+  background: color-mix(in srgb, var(--accent) 9%, var(--card));
+}
+
+.abate-diff-pill.is-zero,
+.abate-summary-diff.is-zero {
+  color: var(--muted-foreground);
+}
+
+.abate-row.is-negative td:first-child {
+  box-shadow: inset 2px 0 0 var(--destructive);
+}
+
+.abate-row.is-positive td:first-child {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.abate-empty {
+  padding: 34px !important;
+  color: var(--muted-foreground);
+  text-align: center !important;
+}
+
+.abate-dialog-card {
+  width: min(1180px, 100%);
+}
+
+.abate-dialog-subtitle {
+  margin: 4px 0 0;
+  color: var(--muted-foreground);
+  font-size: 10px;
+}
+
+.abate-modal-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.abate-modal-summary > div {
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--background);
+}
+
+.abate-modal-summary span,
+.abate-modal-summary strong {
+  display: block;
+}
+
+.abate-modal-summary span {
+  color: var(--muted-foreground);
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.abate-modal-summary strong {
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 780;
+  font-variant-numeric: tabular-nums;
+}
+
+.abate-modal-table-wrap {
+  max-height: 54vh;
+}
+
+.abate-detail-table {
+  min-width: 1040px;
+}
+
+@media (max-width: 1400px) {
+  .abate-page-filters {
+    grid-template-columns: repeat(4, minmax(160px, 1fr));
+  }
+}
+
+@media (max-width: 1050px) {
+  .abate-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .abate-page-filters {
+    grid-template-columns: repeat(2, minmax(170px, 1fr));
+  }
+}
+
+@media (max-width: 780px) {
+  .abate-page-filters,
+  .abate-kpis,
+  .abate-modal-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .abate-table-card {
+    padding: 11px;
+  }
+
+  .abate-kpi-card {
+    min-height: 98px;
+  }
+}
+
+/* RxP: leitura e controles no padrão dos demais indicadores. */
+.abate-kpi-label { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; }
+.abate-kpi-label .mini-button { flex: 0 0 auto; }
+.abate-kpi-card small { font-size: 13px; line-height: 1.5; }
+.abate-page .filter-card-top p,
+.abate-page .abate-section-heading p,
+.abate-page .abate-dialog-subtitle { font-size: 14px; line-height: 1.5; }
+.abate-page .abate-table { font-size: 14px; }
+.abate-page .abate-table thead th { font-size: 13px; }
+.abate-page .abate-table .mini-button { font-size: 14px; padding: 8px 12px; }
+.abate-sort-button { font: inherit; color: inherit; background: transparent; border: 0; padding: 4px 0; cursor: pointer; text-align: inherit; }
+.abate-sort-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+
+.abate-filter-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 14px; margin-left: auto; }
+#periodoRxp { font-size: 14px; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }

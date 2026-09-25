@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="assets/img/favicon-granja.png">
+    <title>Diferença de Aves Abatidas - BI Zootécnico</title>
+    <script>(()=>{const saved=localStorage.getItem('bi-zootecnico-theme');if(saved)document.documentElement.dataset.theme=saved;})();</script>
+    <link href="assets/css/app.css?v=7.26" rel="stylesheet">
+    <link href="assets/vendor/geist/index.css" rel="stylesheet">
+</head>
+<body data-page="diferenca-abate" class="abate-page">
+<div class="app-shell">
+    <header class="page-header">
+        <div>
+            <div class="eyebrow">Dashboard Zootécnico</div>
+            <h1>Diferença de Aves Abatidas</h1>
+            <p>Comparativo entre Qtde Programada, Qtde Real e Dif Qtde RxP.</p>
+        </div>
+        <div class="header-toolbar">
+            <button aria-label="Alternar tema" class="icon-button" data-theme-toggle title="Alternar tema" type="button">
+                <span data-theme-icon>☾</span>
+            </button>
+            <div class="update-meta">
+                <span>Status da tela</span>
+                <strong id="statusRxp" role="status" aria-live="polite">Carregando…</strong>
+            </div>
+        </div>
+    </header>
+
+    <section class="card filter-card">
+        <div class="filter-card-top">
+            <div>
+                <h2>Filtros</h2>
+                <p>Filtros integrados por produtor e pelo último técnico identificado na base dinâmica.</p>
+            </div>
+            <div class="abate-filter-actions"><span id="periodoRxp" role="status" aria-live="polite"></span><button class="button button-ghost-danger" id="limparFiltrosAbate" type="button">Limpar filtros</button></div>
+        </div>
+        <div class="filters-grid abate-page-filters">
+            <div class="filter-field">
+                <span>Data do Abate</span>
+                <select id="filtroData"></select>
+            </div>
+            <div class="filter-field">
+                <span>Unidade / Destino</span>
+                <select id="filtroUnidade"></select>
+            </div>
+            <div class="filter-field">
+                <span>Produtor</span>
+                <select id="filtroProdutor"></select>
+            </div>
+            <div class="filter-field">
+                <span>Técnico</span>
+                <select id="filtroTecnico">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="filter-field">
+                <span>Tipo de Granja</span>
+                <select id="filtroTipoGranja"></select>
+            </div>
+            <div class="filter-field">
+                <span>Modelo Aviário</span>
+                <select id="filtroModelo"></select>
+            </div>
+            <div class="filter-field">
+                <span>Status da Diferença</span>
+                <select id="filtroStatus">
+                    <option value="">Todos</option>
+                    <option value="negativa">Abaixo do programado</option>
+                    <option value="positiva">Acima do programado</option>
+                    <option value="zero">Sem diferença</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <div id="erroRxp" class="alert alert-error hidden" role="alert"></div>
+
+    <section class="abate-kpis" aria-label="Resumo de aves abatidas">
+        <article class="card abate-kpi-card">
+            <span class="abate-kpi-accent"></span>
+            <div class="abate-kpi-label">Qtde Programada <button class="mini-button" type="button" data-rxp-formula="programada" aria-label="Ver fórmula de Qtde Programada"><span class="formula-fx">ƒx</span></button></div>
+            <strong class="abate-kpi-value" id="kpiProgramada">—</strong>
+            <small>coluna Qtde Programada</small>
+        </article>
+        <article class="card abate-kpi-card">
+            <span class="abate-kpi-accent"></span>
+            <div class="abate-kpi-label">Qtde Real <button class="mini-button" type="button" data-rxp-formula="real" aria-label="Ver fórmula de Qtde Real"><span class="formula-fx">ƒx</span></button></div>
+            <strong class="abate-kpi-value" id="kpiReal">—</strong>
+            <small>coluna Qtde Real</small>
+        </article>
+        <article class="card abate-kpi-card abate-kpi-diff" id="cardDiferenca">
+            <span class="abate-kpi-accent"></span>
+            <div class="abate-kpi-label">Dif Qtde RxP <button class="mini-button" type="button" data-rxp-formula="diferenca" aria-label="Ver fórmula de Dif Qtde RxP"><span class="formula-fx">ƒx</span></button></div>
+            <strong class="abate-kpi-value" id="kpiDiferenca">—</strong>
+            <small id="kpiDiferencaLegenda">campo prioritário da análise</small>
+        </article>
+        <article class="card abate-kpi-card">
+            <span class="abate-kpi-accent"></span>
+            <div class="abate-kpi-label">Registros com Diferença <button class="mini-button" type="button" data-rxp-formula="registros" aria-label="Ver fórmula de Registros com Diferença"><span class="formula-fx">ƒx</span></button></div>
+            <strong class="abate-kpi-value" id="kpiRegistros">—</strong>
+            <small>Dif Qtde RxP diferente de zero</small>
+        </article>
+    </section>
+
+    <section class="card abate-table-card">
+        <div class="card-heading-row abate-section-heading">
+            <div>
+                <div class="card-kicker">Visão consolidada</div>
+                <h2>Comparativo por Unidade / Destino</h2>
+                <p>A diferença exibida é a soma do campo de origem <strong>Dif Qtde RxP</strong>; ela não é recalculada no front-end.</p>
+            </div>
+        </div>
+        <div class="abate-table-wrap">
+            <table class="abate-table">
+                <thead>
+                    <tr>
+                        <th>Unidade / Destino</th>
+                        <th class="num">Qtde Programada</th>
+                        <th class="num">Qtde Real</th>
+                        <th class="num abate-diff-heading">Dif Qtde RxP</th>
+                        <th class="num">Registros c/ Dif.</th>
+                        <th class="action">Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaUnidadesAbate"></tbody>
+                <tfoot id="tabelaUnidadesAbateTotal"></tfoot>
+            </table>
+        </div>
+    </section>
+
+</div>
+
+<div class="dialog-layer hidden" id="modalAbate">
+    <div class="dialog-backdrop" id="modalAbateBackdrop"></div>
+    <section class="dialog-card abate-dialog-card" role="dialog" aria-modal="true" aria-labelledby="modalAbateTitulo" tabindex="-1">
+        <header class="dialog-header">
+            <div>
+                <div class="eyebrow">Detalhamento da unidade</div>
+                <h2 id="modalAbateTitulo">Produtores</h2>
+                <p class="abate-dialog-subtitle" id="modalAbateSubtitulo"></p>
+            </div>
+            <button class="icon-button" id="modalAbateFechar" type="button" aria-label="Fechar detalhamento">×</button>
+        </header>
+
+        <div class="abate-modal-summary">
+            <div><span>Programada</span><strong id="modalProgramada">—</strong></div>
+            <div><span>Real</span><strong id="modalReal">—</strong></div>
+            <div><span>Dif Qtde RxP</span><strong id="modalDiferenca">—</strong></div>
+        </div>
+
+        <div class="abate-table-wrap abate-modal-table-wrap">
+            <table class="abate-table abate-detail-table">
+                <thead>
+                    <tr>
+                        <th>Produtor</th>
+                        <th>Técnico</th>
+                        <th>Data</th>
+                        <th>Galpão</th>
+                        <th>Lote</th>
+                        <th>Tipo Granja</th>
+                        <th>Modelo Aviário</th>
+                        <th class="num">Qtde Programada</th>
+                        <th class="num">Qtde Real</th>
+                        <th class="num abate-diff-heading">Dif Qtde RxP</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaProdutoresAbate"></tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<div class="dialog-layer hidden" id="formulaModalRxp">
+    <div class="dialog-backdrop" id="formulaBackdropRxp"></div>
+    <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="formulaTituloRxp" tabindex="-1">
+        <header class="dialog-header"><div><div class="eyebrow">Fórmula do indicador</div><h2 id="formulaTituloRxp"></h2></div><button class="icon-button" id="formulaFecharRxp" type="button" aria-label="Fechar fórmula">×</button></header>
+        <div class="dialog-body"><div class="info-block"><span>Fórmula</span><div class="code-inline" id="formulaExpressaoRxp"></div></div><div class="info-block"><span>Descrição</span><p id="formulaDescricaoRxp"></p></div><div id="formulaExplicacaoRxp"></div></div>
+    </section>
+</div>
+
+<script src="assets/js/theme.js?v=7.6"></script>
+<script src="assets/js/config.js?v=7.25"></script>
+<script src="assets/js/formula-ui.js?v=7.18"></script>
+<script src="assets/js/filters.js?v=7.12"></script>
+<script src="assets/js/rxp-formulas.js?v=7.25"></script>
+<script src="data/rxp_local.js?v=7.25"></script>
+<script src="assets/js/api.js?v=7.25"></script>
+<script src="assets/js/local-parquet.js?v=7.25"></script>
+<script src="assets/js/rxp.js?v=7.26"></script>
+<script src="assets/js/sidebar.js?v=7.24"></script>
+</body>
+</html>

@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import PARQUET_BASE_DINAMICA
 from metrics import METRICAS, ORDEM_INDICADORES, sql_metrica
 from lotes_criacao import router as lotes_criacao_router
+from rxp import router as rxp_router
 
 
 app = FastAPI(title="BI Zootécnico API")
@@ -24,6 +25,7 @@ app.add_middleware(
 )
 
 app.include_router(lotes_criacao_router)
+app.include_router(rxp_router)
 
 
 MESES = [

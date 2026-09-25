@@ -121,7 +121,7 @@ DIVIDE(
 
     peso_medio: {
         id: "peso_medio",
-        nome: "Peso Médio",
+        nome: "Peso Médio Ponderado",
         coluna: "Peso Médio",
         unidade: "",
         tipo_calculo: "media_ponderada",
@@ -136,7 +136,7 @@ DIVIDE(
     ),
     SUM(base_dinamica_tratado[Aves Abatidas])
 )`,
-        descricao: "Peso médio ponderado pelas Aves Abatidas."
+        descricao: "Média ponderada da coluna [Peso Médio] da base de desempenho, usando [Aves Abatidas] como peso. Não utiliza as colunas semanais [Peso Med.-07] a [Peso Med.-42]."
     },
 
     vazio: {
@@ -147,23 +147,23 @@ DIVIDE(
         tipo_calculo: "media_ponderada",
         ponderador: "Aves Abatidas",
         casas_decimais: 1,
-        formula_exibicao: "Σ(Vazio × Aves Abatidas) / Σ(Aves Abatidas), somente registros com 7 ≤ Vazio ≤ 18",
+        formula_exibicao: "Σ(Vazio ajustado × Aves Abatidas) / Σ(Aves Abatidas)",
         formula_dax: `base_dinamica_media_ponderada_vazio =
 VAR BaseValida =
     FILTER(base_dinamica_tratado,
-        base_dinamica_tratado[Vazio] >= 7 && base_dinamica_tratado[Vazio] <= 18)
+        NOT ISBLANK(base_dinamica_tratado[Vazio]) && NOT ISBLANK(base_dinamica_tratado[Aves Abatidas]))
 RETURN
 DIVIDE(
     SUMX(
         BaseValida,
-        base_dinamica_tratado[Vazio] * base_dinamica_tratado[Aves Abatidas]
+        IF(base_dinamica_tratado[Vazio] < 7 || base_dinamica_tratado[Vazio] > 18, 14, base_dinamica_tratado[Vazio]) * base_dinamica_tratado[Aves Abatidas]
     ),
     SUMX(BaseValida, base_dinamica_tratado[Aves Abatidas])
 )`,
         regra_adicional: {
             status: "implementada",
             descricao:
-                "Somente registros com 7 ≤ Vazio ≤ 18 participam do numerador e do denominador, sem substituição."
+                "Em cada registro, substitua [Vazio] menor que 7 ou maior que 18 por 14 antes do cálculo. Valores de 7 a 18 são mantidos; valores ausentes continuam fora da média."
         },
         descricao: "Vazio médio ponderado pelas Aves Abatidas."
     },
@@ -188,26 +188,6 @@ DIVIDE(
 )`,
         descricao:
             "Morte no transporte média ponderada pelas Aves Abatidas."
-    },
-
-    cac_ref: {
-        id: "cac_ref",
-        nome: "CAC Ref",
-        coluna: "CAC REF",
-        unidade: "",
-        tipo_calculo: "media_ponderada",
-        ponderador: "Aves Abatidas",
-        casas_decimais: 3,
-        formula_exibicao: "Σ(CAC REF × Aves Abatidas) / Σ(Aves Abatidas)",
-        formula_dax: `base_dinamica_media_ponderada_cac_ref =
-DIVIDE(
-    SUMX(
-        base_dinamica_tratado,
-        base_dinamica_tratado[CAC REF] * base_dinamica_tratado[Aves Abatidas]
-    ),
-    SUM(base_dinamica_tratado[Aves Abatidas])
-)`,
-        descricao: "Média ponderada do CAC de referência pelas Aves Abatidas."
     },
 
     aves_abatidas: {
@@ -235,7 +215,6 @@ const BI_METRIC_ORDER = [
     "peso_medio",
     "vazio",
     "morte_transporte",
-    "cac_ref",
     "aves_abatidas"
 ];
 
@@ -292,8 +271,9 @@ function sqlMetrica(metricId) {
             );
 
         if (metricId === "vazio") {
-            const valido = `(${valor}) BETWEEN 7 AND 18`;
-            return `SUM(CASE WHEN ${valido} THEN (${valor}) * (${peso}) END)
+            const valido = `(${valor}) IS NOT NULL AND (${peso}) IS NOT NULL`;
+            const ajustado = `CASE WHEN (${valor}) < 7 OR (${valor}) > 18 THEN 14 ELSE (${valor}) END`;
+            return `SUM(CASE WHEN ${valido} THEN (${ajustado}) * (${peso}) END)
                 / NULLIF(SUM(CASE WHEN ${valido} THEN (${peso}) END), 0)`;
         }
 
@@ -308,6 +288,34 @@ function sqlMetrica(metricId) {
         `Tipo de cálculo não suportado: ${metrica.tipo_calculo}`
     );
 }
+
+
+// Documentação do cálculo local com os nomes físicos das colunas.
+Object.values(METRICAS).forEach(metric => {
+    metric.colunas = [...new Set([metric.coluna, metric.ponderador].filter(Boolean))];
+    if (metric.tipo_calculo === "soma") {
+        metric.formula_exibicao = "Σ([" + metric.coluna + "])";
+        metric.passos = ["Aplique os filtros atuais e use registros com ano de abate a partir de 2023.", "Some os valores da coluna [" + metric.coluna + "]."];
+    } else {
+        metric.formula_exibicao = "Σ([" + metric.coluna + "] × [Aves Abatidas]) / Σ([Aves Abatidas])";
+        const table = "base_dinamica_tratado";
+        const column = table + "[" + metric.coluna + "]";
+        const weight = table + "[Aves Abatidas]";
+        const valid = "YEAR(" + table + "[Data de Abate]) >= 2023 && NOT ISBLANK(" + column + ") && NOT ISBLANK(" + weight + ")"
+            ;
+        const adjusted = metric.id === "vazio" ? "IF(" + column + " < 7 || " + column + " > 18, 14, " + column + ")" : column;
+        if (metric.id === "vazio") metric.formula_exibicao = "Σ(SE([Vazio] < 7 OU [Vazio] > 18; 14; [Vazio]) × [Aves Abatidas]) / Σ([Aves Abatidas])";
+        metric.formula_dax = metric.id + " =\nVAR LinhasValidas = FILTER(" + table + ", " + valid + ")\nRETURN DIVIDE(\n    SUMX(LinhasValidas, " + adjusted + " * " + weight + "),\n    SUMX(LinhasValidas, " + weight + ")\n)";
+        metric.passos = [
+            "Aplique os filtros atuais e use registros com ano de abate a partir de 2023.",
+            "Use apenas linhas com valor válido em [" + metric.coluna + "] e [Aves Abatidas].",
+            ...(metric.id === "vazio" ? ["Em cada linha, se [Vazio] < 7 ou [Vazio] > 18, use 14. Mantenha os valores entre 7 e 18, incluindo os limites. Não transforme valores ausentes em 14."] : []),
+            metric.id === "vazio" ? "Multiplique o Vazio ajustado por [Aves Abatidas] de cada linha e some os produtos." : "Multiplique [" + metric.coluna + "] por [Aves Abatidas] em cada linha e some os produtos.",
+            "Divida pela soma de [Aves Abatidas] dessas mesmas linhas. Se o denominador for zero, mostre —.",
+            ...(metric.unidade === "%" ? ["A coluna já contém percentual: não multiplique novamente por 100."] : [])
+        ];
+    }
+});
 
 window.METRICAS = METRICAS;
 window.BI_METRIC_ORDER = BI_METRIC_ORDER;

@@ -130,6 +130,8 @@ As dimensões usadas são `Status Acerto`, `Tipo de Granja`, `Modelo`, `Produtor
 
 Todas as médias usam `SUM(valor × Aves Abatidas) / SUM(Aves Abatidas)`. Denominador zero resulta em `null`. Valores numéricos são convertidos para DOUBLE, com tentativa adicional de conversão de decimal com vírgula. Valores inválidos tornam-se nulos; o peso de uma linha com métrica nula ainda pode entrar no denominador. Os totais anuais são recalculados sobre os registros filtrados, não pela média simples dos meses.
 
+> **Atenção — aba Lotes em Criação:** o card/tabela **Peso Médio Geral** não segue a ponderação acima. Nessa aba, cada coluna semanal (`Peso Med.-07`, `Peso Med.-14`, `Peso Med.-21`, `Peso Med.-28`, `Peso Med.-35`, `Peso Med.-42`) tem sua média simples calculada após os filtros; o Peso Médio Geral é a média dessas médias semanais válidas. O filtro de Período de Dias limita quais colunas semanais entram no cálculo, e `Ps Pinto` não entra nessa métrica.
+
 Regras atuais:
 
 - Apenas registros com ano de abate **a partir de 2023** entram nos filtros e cálculos. Datas nulas ou não conversíveis são excluídas desse contexto.

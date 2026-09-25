@@ -66,12 +66,11 @@ FORMULAS_LOTES = [
     },
     {
         "id": "peso_medio",
-        "nome": "Peso Médio",
+        "nome": "Peso Médio Geral",
         "unidade": "g",
-        "formula_exibicao": "Σ(Último peso disponível do lote × Aves Atuais) / Σ(Aves Atuais)",
-        "descricao": "Usa o peso semanal mais recente disponível entre 42, 35, 28, 21, 14 e 7 dias; na ausência deles, usa Ps Pinto.",
-        "ponderador": "Aves Atuais",
-        "formula_dax": """peso_medio_geral =\nDIVIDE(\n    SUMX(base, [Último Peso Disponível] * [Aves Atuais]),\n    SUMX(base, [Aves Atuais])\n)""",
+        "formula_exibicao": "MÉDIA(MÉDIA(Peso Med.-07), MÉDIA(Peso Med.-14), ..., MÉDIA(Peso Med.-42))",
+        "descricao": "Calcula separadamente a média simples de cada coluna semanal de peso e depois calcula a média dessas médias semanais válidas. Todas as dimensões/filtros são aplicadas antes do cálculo; semanas sem valor válido não entram. Ps Pinto não participa.",
+        "formula_dax": """peso_medio_geral =\nAVERAGEX(\n    {7, 14, 21, 28, 35, 42},\n    [Media da coluna de peso da idade]\n)""",
     },
 ]
 
@@ -158,6 +157,23 @@ def _latest_weight_expr() -> str:
     ]
     available = [_num(c) for c in columns if c in _columns]
     return "COALESCE(" + ", ".join(available) + ")" if available else "NULL"
+
+
+def _general_weight_expr() -> str:
+    weekly_means = []
+    for age in (7, 14, 21, 28, 35, 42):
+        column = f"Peso Med.-{age:02d}"
+        if column in _columns:
+            weekly_means.append(
+                f'AVG(CASE WHEN idade_atual >= {age} THEN {_num(column)} ELSE NULL END)'
+            )
+    if not weekly_means:
+        return "NULL"
+    numerator = " + ".join(f"COALESCE(({expr}), 0)" for expr in weekly_means)
+    denominator = " + ".join(
+        f"CASE WHEN ({expr}) IS NULL THEN 0 ELSE 1 END" for expr in weekly_means
+    )
+    return f"CASE WHEN ({denominator}) > 0 THEN ({numerator}) / ({denominator}) ELSE NULL END"
 
 
 def _list(value):
@@ -341,10 +357,7 @@ def resumo(
                 CASE WHEN SUM(aves_alojadas) > 0
                     THEN SUM(mortes_acumuladas) / SUM(aves_alojadas) * 100
                     ELSE NULL END AS mortalidade,
-                CASE WHEN SUM(CASE WHEN peso_atual IS NOT NULL THEN aves_atuais ELSE 0 END) > 0
-                    THEN SUM(CASE WHEN peso_atual IS NOT NULL THEN peso_atual * aves_atuais ELSE 0 END)
-                         / SUM(CASE WHEN peso_atual IS NOT NULL THEN aves_atuais ELSE 0 END)
-                    ELSE NULL END AS peso_medio,
+                {_general_weight_expr()} AS peso_medio,
                 MAX(TRY_CAST("Data_Analise" AS DATE)) AS data_analise
             FROM base
             {where_sql}

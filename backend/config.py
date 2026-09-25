@@ -9,3 +9,5 @@ PARQUET_BASE_DINAMICA = (
 PARQUET_LOTES_ABERTOS = (
     PROJECT_ROOT / "data" / "indice_zootecnico_mortalidade_peso_lotes_abertos_tratado.parquet"
 )
+
+PARQUET_RXP = PROJECT_ROOT / "data" / "lotes_planejados_abate.parquet"

@@ -108,10 +108,10 @@
         }
         let num = 0, den = 0;
         rows.forEach(row => {
-            const value = n(row[metric.coluna]);
+            let value = n(row[metric.coluna]);
             const weight = n(row["Aves Abatidas"]);
             if (value === null || weight === null) return;
-            if (metricId === "vazio" && (value < 7 || value > 18)) return;
+            if (metricId === "vazio" && (value < 7 || value > 18)) value = 14;
             num += value * weight;
             den += weight;
         });
@@ -215,10 +215,61 @@
 
     async function filtrosLotes(filters){const d=await lotesData();const out={};for(const key of Object.keys(LOTES_DIM)){out[key]=[...new Set(d.lotes.filter(r=>lotesMatch(r,filters,key)).map(r=>String(r[key==="tipo_granja"?"tipo_granja":key]||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"));}const ages=d.lotes.filter(r=>lotesMatch(r,filters,"faixa_idade")).map(r=>r.idade_atual);const min=Math.min(...ages),max=Math.max(...ages);out.faixa_idade=Object.entries(FAIXAS).filter(([,v])=>ages.length&&v[1]>=min&&v[0]<=max).map(([k,v])=>({valor:k,nome:`${v[0]}–${v[1]} dias`}));return out;}
 
-    window.LocalParquet = { baseRows, lotesData, filtrosBase, desempenho, detalhes, filtrosLotes };
+    // O gerador offline usa o mesmo SELECT e vínculo de técnicos da API.
+    const RXP_DIM = { data: "data", destino: "destino", produtor: "produtor",
+        tecnico: "tecnico", tipo_granja: "tipoGranja", modelo: "modelo" };
 
+    function rxpStatus(row) {
+        const value = n(row.difQtdeRxP);
+        return value === null ? "" : value < 0 ? "negativa" : value > 0 ? "positiva" : "zero";
+    }
+
+    function matchRxp(row, filters = {}, exclude = null) {
+        if (!asDate(row.data)) return false;
+        for (const [key, field] of Object.entries(RXP_DIM)) {
+            const selected = key === exclude ? [] : list(filters[key]);
+            if (selected.length && !selected.includes(String(row[field] ?? ""))) return false;
+        }
+        const statuses = exclude === "status" ? [] : list(filters.status);
+        return !statuses.length || statuses.includes(rxpStatus(row));
+    }
+
+    async function rxpData(filters = {}) {
+        const rows = requireLocalRows("RXP_ROWS", window.RXP_ROWS).filter(r => matchRxp(r, filters));
+        const cards = rows.reduce((acc, r) => {
+            acc.programada += n(r.programada) ?? 0;
+            acc.real += n(r.real) ?? 0;
+            acc.diferenca += n(r.difQtdeRxP) ?? 0;
+            if (n(r.difQtdeRxP) !== null && n(r.difQtdeRxP) !== 0) acc.registrosComDiferenca++;
+            return acc;
+        }, {programada: 0, real: 0, diferenca: 0, registrosComDiferenca: 0});
+        return {arquivo: window.RXP_ARQUIVO || "lotes_planejados_abate.parquet", rows, cards};
+    }
+
+    async function filtrosRxp(filters = {}) {
+        const rows = requireLocalRows("RXP_ROWS", window.RXP_ROWS);
+        const out = {};
+        for (const [key, field] of Object.entries(RXP_DIM)) {
+            out[key] = [...new Set(rows.filter(r => matchRxp(r, filters, key))
+                .map(r => String(r[field] ?? "")).filter(Boolean))].sort();
+            if (key === "data") out[key].reverse();
+        }
+        out.status = [...new Set(rows.filter(r => matchRxp(r, filters, "status"))
+            .map(rxpStatus).filter(Boolean))].sort();
+        return out;
+    }
+
+    window.LocalParquet = { baseRows, lotesData, filtrosBase, desempenho, detalhes, filtrosLotes, rxpData, filtrosRxp };
+
+    const remoteApiGet = window.apiGet;
     window.apiGet = async function(endpoint, params={}){
         try{
+            if (typeof remoteApiGet === "function" && typeof APP_CONFIG !== "undefined" && APP_CONFIG.API_URL) {
+                return remoteApiGet(endpoint, params);
+            }
+            if(endpoint.includes("/rxp/formulas")) return {metricas: requireLocalRows("FORMULAS_RXP", window.FORMULAS_RXP)};
+            if(endpoint.includes("/rxp/filtros")) return filtrosRxp(params);
+            if(endpoint.includes("/rxp")) return rxpData(params);
             if(endpoint.includes("lotes-em-criacao/formulas")) return {metricas: window.FORMULAS_LOTES || []};
             if(endpoint.includes("lotes-em-criacao/filtros")) return filtrosLotes(params);
             if(endpoint.includes("lotes-em-criacao")) return lotesData();

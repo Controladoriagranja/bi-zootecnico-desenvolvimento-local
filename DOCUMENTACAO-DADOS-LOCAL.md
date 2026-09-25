@@ -75,6 +75,25 @@ A descrição e o DAX de referência de Vazio foram alinhados à regra que o SQL
 | `aves_abatidas` | `Aves Abatidas` | Σ(Aves Abatidas) |
 
 Ponderador: **Aves Abatidas**. Aves Abatidas é soma, nunca média.
+
+### Lotes em Criação — Peso Médio Geral
+
+A métrica **Peso Médio Geral** da aba **Lotes em Criação** é diferente do `peso_medio` da aba Desempenho. Ela **não é ponderada por Aves Abatidas** e **não usa o último peso de cada lote**.
+
+O cálculo é feito em duas etapas, sempre depois de aplicar todos os filtros ativos da tela (Período de Dias, Tipo de Granja, Produtor, Modelo, Galpão, Técnico e Mist Linha):
+
+1. Para cada idade selecionada, calcule a média simples da coluna correspondente, usando somente lotes que já atingiram aquela idade e valores de peso válidos. Ex.: 7 dias usa `Peso Med.-07`; 35 dias usa `Peso Med.-35`.
+2. Some as médias semanais válidas e divida pela quantidade de semanas que possuem média válida.
+
+Exemplo conceitual, se as médias filtradas forem 180 g em 7 dias, 525 g em 14 dias e 1.050 g em 21 dias:
+
+```text
+Peso Médio Geral = (180 + 525 + 1.050) / 3 = 585 g
+```
+
+Se o filtro **Período de Dias** selecionar apenas 7 e 14 dias, o cálculo usa somente `Peso Med.-07` e `Peso Med.-14`. Se uma semana selecionada não tiver nenhum valor válido, ela não entra no numerador nem no divisor. `Ps Pinto` não participa do Peso Médio Geral.
+
+O gráfico **Média da Coluna de Peso por Idade** mostra exatamente a primeira etapa do cálculo: uma média separada para cada coluna semanal. A tabela da aba aplica a mesma regra dentro de cada agrupamento exibido.
 Vazio inclui somente **7 ≤ Vazio ≤ 18**, excluindo as demais linhas do numerador e denominador apenas desse indicador. Sem substituição ou interpolação.
 A mesma função alimenta cards, tabelas, totais, rankings e evolução. Totais são recalculados sobre as linhas filtradas, não pela média dos meses.
 Nas demais médias, permanece o comportamento oficial de pesos no denominador mesmo quando a métrica está nula; denominador zero gera null.

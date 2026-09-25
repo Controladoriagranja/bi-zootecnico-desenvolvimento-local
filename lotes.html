@@ -6,7 +6,7 @@
     <link rel="icon" href="assets/img/favicon-granja.png">
     <title>Lotes em Criação - BI Zootécnico</title>
     <script>(()=>{const saved=localStorage.getItem('bi-zootecnico-theme');if(saved)document.documentElement.dataset.theme=saved;})();</script>
-    <link href="assets/css/app.css?v=7.14" rel="stylesheet">
+    <link href="assets/css/app.css?v=7.26" rel="stylesheet">
     <link href="assets/vendor/geist/index.css" rel="stylesheet">
 </head>
 <body data-page="lotes" class="lotes-reference-page">
@@ -32,6 +32,7 @@
         <div class="filters-grid lotes-page-filters">
             <div class="filter-field"><span>Período de Dias</span><div class="checkbox-multiselect" id="periodoDias"></div></div>
             <div class="filter-field"><span>Tipo de Granja</span><div class="checkbox-multiselect" id="tipoGranja"></div></div>
+            <div class="filter-field"><span>Produtor</span><div class="checkbox-multiselect" id="produtor"></div></div>
             <div class="filter-field"><span>Modelo</span><div class="checkbox-multiselect" id="modelo"></div></div>
             <div class="filter-field"><span>Galpão</span><div class="checkbox-multiselect" id="galpao"></div></div>
             <div class="filter-field"><span>Técnico</span><div class="checkbox-multiselect" id="tecnico"></div></div>
@@ -45,15 +46,15 @@
 
     <section class="lotes-charts-grid">
         <article class="card lotes-chart-card">
-            <header><div><h2>Mortalidade Semanal</h2><p class="chart-subtitle">Mortalidade considera M + D: mortes + descartes em cada idade.</p></div><div class="chart-legend"><span><i class="dot dot-primary"></i>M+D (Qtde)</span><span><i class="dot dot-accent"></i>M+D (%)</span></div></header>
+            <header><div><h2>Mortalidade Semanal</h2><p class="chart-subtitle">Mortalidade considera M + D: mortes + descartes em cada idade.</p><button class="mini-button lotes-formula-button" type="button" data-lotes-formula="mortalidade_semanal" title="Ver fórmula" aria-label="Ver fórmula do gráfico"><span class="formula-fx">ƒx</span></button></div><div class="chart-legend"><span><i class="dot dot-primary"></i>M+D (Qtde)</span><span><i class="dot dot-accent"></i>M+D (%)</span></div></header>
             <div class="lotes-chart" id="chartMortalidade"></div>
         </article>
         <article class="card lotes-chart-card">
-            <header><h2>Peso Médio Semanal por Idade</h2></header>
+            <header><h2>Média da Coluna de Peso por Idade</h2><button class="mini-button lotes-formula-button" type="button" data-lotes-formula="peso_semanal" title="Ver fórmula" aria-label="Ver fórmula do gráfico"><span class="formula-fx">ƒx</span></button></header>
             <div class="lotes-chart" id="chartPesoSemanal"></div>
         </article>
         <article class="card lotes-chart-card">
-            <header><h2>Curva de Crescimento de Peso</h2></header>
+            <header><h2>Curva de Crescimento de Peso</h2><button class="mini-button lotes-formula-button" type="button" data-lotes-formula="crescimento" title="Ver fórmula" aria-label="Ver fórmula do gráfico"><span class="formula-fx">ƒx</span></button></header>
             <div class="lotes-chart" id="chartCrescimento"></div>
         </article>
     </section>
@@ -68,7 +69,7 @@
                     <th class="num"><button class="lotes-sort-button num" type="button" data-sort="aves">Aves Alojadas <span class="sort-icon" aria-hidden="true">↓</span></button></th>
                     <th class="num"><button class="lotes-sort-button num" type="button" data-sort="mortes">Mortalidade no Período <span class="sort-icon" aria-hidden="true">↕</span></button></th>
                     <th class="num"><button class="lotes-sort-button num" type="button" data-sort="mortalidade">Mortalidade no Período (%) <span class="sort-icon" aria-hidden="true">↕</span></button></th>
-                    <th class="num"><button class="lotes-sort-button num" type="button" data-sort="peso">Peso Médio <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+                    <th class="num"><button class="lotes-sort-button num" type="button" data-sort="peso">Peso Médio Geral <span class="sort-icon" aria-hidden="true">↕</span></button></th>
                 </tr></thead>
                 <tbody id="tabelaLotesBody"></tbody>
                 <tfoot id="tabelaLotesFoot"></tfoot>
@@ -77,13 +78,23 @@
     </section>
 </div>
 
+<div class="dialog-layer hidden" id="formulaModalLotes">
+    <div class="dialog-backdrop" id="formulaBackdropLotes"></div>
+    <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="formulaTituloLotes" tabindex="-1">
+        <header class="dialog-header"><div><div class="eyebrow">Fórmula do indicador</div><h2 id="formulaTituloLotes"></h2></div><button class="icon-button" id="formulaFecharLotes" type="button" aria-label="Fechar fórmula">×</button></header>
+        <div class="dialog-body"><div class="info-block"><span>Fórmula</span><div class="code-inline" id="formulaExpressaoLotes"></div></div><div class="info-block"><span>Descrição</span><p id="formulaDescricaoLotes"></p></div><div id="formulaExplicacaoLotes"></div></div>
+    </section>
+</div>
+
 <script src="assets/vendor/echarts/echarts.min.js"></script>
 <script src="assets/js/theme.js?v=7.6"></script>
-<script src="assets/js/metrics.js?v=7.8"></script>
+<script src="assets/js/metrics.js?v=7.21"></script>
+<script src="assets/js/formula-ui.js?v=7.18"></script>
+<script src="assets/js/lotes-formulas.js?v=7.22"></script>
 <script src="assets/js/filters.js?v=7.12"></script>
 <script src="data/base_dinamica_local.js?v=7.10"></script>
 <script src="data/lotes_abertos_local.js?v=7.15"></script>
-<script src="assets/js/lotes.js?v=7.17"></script>
-<script src="assets/js/sidebar.js?v=7.14"></script>
+<script src="assets/js/lotes.js?v=7.23"></script>
+<script src="assets/js/sidebar.js?v=7.24"></script>
 </body>
 </html>

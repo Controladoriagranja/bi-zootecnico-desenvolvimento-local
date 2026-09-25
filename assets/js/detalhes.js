@@ -121,6 +121,9 @@ async function carregarIndicadores() {
             ? response.metricas
             : [];
 
+    metricCatalog = metricCatalog.filter(metric => BI_METRIC_ORDER.includes(metric.id));
+    if (!metricCatalog.some(metric => metric.id === metricId)) metricId = "gmd";
+
     const select =
         document.getElementById(
             "indicador"
@@ -252,6 +255,8 @@ function render() {
 
     const metric =
         detalhesData.indicador;
+
+    FormulaUI.render(document.getElementById("formulaIndicador"), [METRICAS[metric.id]], "formula-detalhe");
 
     document
         .getElementById(
@@ -513,6 +518,7 @@ async function iniciar() {
         preserve: true
     });
 
+    atualizarUrl();
     await carregarDetalhes(true);
 }
 
