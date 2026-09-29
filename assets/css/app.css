@@ -2792,11 +2792,11 @@ body.side-nav-open {
   color: var(--muted-foreground);
 }
 
-.abate-row.is-negative td:first-child {
+.abate-table:not(.abate-detail-table) .abate-row.is-negative td:first-child {
   box-shadow: inset 2px 0 0 var(--destructive);
 }
 
-.abate-row.is-positive td:first-child {
+.abate-table:not(.abate-detail-table) .abate-row.is-positive td:first-child {
   box-shadow: inset 2px 0 0 var(--accent);
 }
 
