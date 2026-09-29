@@ -39,38 +39,31 @@
         <div class="filters-grid abate-page-filters">
             <div class="filter-field">
                 <span>Data do Abate</span>
-                <select id="filtroData"></select>
+                <div class="checkbox-multiselect" id="filtroData"></div>
             </div>
             <div class="filter-field">
                 <span>Unidade / Destino</span>
-                <select id="filtroUnidade"></select>
-            </div>
-            <div class="filter-field">
-                <span>Produtor</span>
-                <select id="filtroProdutor"></select>
-            </div>
-            <div class="filter-field">
-                <span>Técnico</span>
-                <select id="filtroTecnico">
-                    <option value="">Todos</option>
-                </select>
+                <div class="checkbox-multiselect" id="filtroUnidade"></div>
             </div>
             <div class="filter-field">
                 <span>Tipo de Granja</span>
-                <select id="filtroTipoGranja"></select>
+                <div class="checkbox-multiselect" id="filtroTipoGranja"></div>
             </div>
             <div class="filter-field">
                 <span>Modelo Aviário</span>
-                <select id="filtroModelo"></select>
+                <div class="checkbox-multiselect" id="filtroModelo"></div>
             </div>
             <div class="filter-field">
-                <span>Status da Diferença</span>
-                <select id="filtroStatus">
-                    <option value="">Todos</option>
-                    <option value="negativa">Abaixo do programado</option>
-                    <option value="positiva">Acima do programado</option>
-                    <option value="zero">Sem diferença</option>
-                </select>
+                <span>Produtor</span>
+                <div class="checkbox-multiselect" id="filtroProdutor"></div>
+            </div>
+            <div class="filter-field">
+                <span>Galpão</span>
+                <div class="checkbox-multiselect" id="filtroGalpao"></div>
+            </div>
+            <div class="filter-field">
+                <span>Técnico</span>
+                <div class="checkbox-multiselect" id="filtroTecnico"></div>
             </div>
         </div>
     </section>
@@ -188,8 +181,8 @@
 <script src="assets/js/rxp-formulas.js?v=7.25"></script>
 <script src="data/rxp_local.js?v=7.25"></script>
 <script src="assets/js/api.js?v=7.25"></script>
-<script src="assets/js/local-parquet.js?v=7.29"></script>
-<script src="assets/js/rxp.js?v=7.29"></script>
+<script src="assets/js/local-parquet.js?v=7.31"></script>
+<script src="assets/js/rxp.js?v=7.32"></script>
 <script src="assets/js/sidebar.js?v=7.27"></script>
 </body>
 </html>

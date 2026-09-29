@@ -279,7 +279,7 @@
 
     // O gerador offline usa o mesmo SELECT e vínculo de técnicos da API.
     const RXP_DIM = { data: "data", destino: "destino", produtor: "produtor",
-        tecnico: "tecnico", tipo_granja: "tipoGranja", modelo: "modelo" };
+        galpao: "galpao", tecnico: "tecnico", tipo_granja: "tipoGranja", modelo: "modelo" };
 
     /**
      * FÓRMULA: Status RxP

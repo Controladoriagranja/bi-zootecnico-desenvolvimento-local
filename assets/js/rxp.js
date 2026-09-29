@@ -7,10 +7,10 @@
         data: document.getElementById("filtroData"),
         unidade: document.getElementById("filtroUnidade"),
         produtor: document.getElementById("filtroProdutor"),
+        galpao: document.getElementById("filtroGalpao"),
         tecnico: document.getElementById("filtroTecnico"),
         tipoGranja: document.getElementById("filtroTipoGranja"),
         modelo: document.getElementById("filtroModelo"),
-        status: document.getElementById("filtroStatus"),
         limpar: document.getElementById("limparFiltrosAbate"),
         kpiProgramada: document.getElementById("kpiProgramada"),
         kpiReal: document.getElementById("kpiReal"),
@@ -47,33 +47,31 @@
     }
 
     const filterFields = {data: els.data, destino: els.unidade, produtor: els.produtor,
-        tecnico: els.tecnico, tipo_granja: els.tipoGranja, modelo: els.modelo, status: els.status};
-    const statusLabels = {negativa: "Abaixo do programado", positiva: "Acima do programado", zero: "Sem diferença"};
+        galpao: els.galpao, tecnico: els.tecnico, tipo_granja: els.tipoGranja, modelo: els.modelo};
     const errorBox = document.getElementById("erroRxp");
     const statusBox = document.getElementById("statusRxp");
     let requestId = 0;
 
+    const filterController = new FilterController({
+        fields: Object.entries(filterFields).map(([apiKey, el]) => ({
+            id: el.id, apiKey, multi: true, search: true
+        })),
+        filtersEndpoint: APP_CONFIG.endpoints.rxpFiltros,
+        onChange: () => reload(false)
+    });
+    filterController.normalizeOptions = (field, values) => values.map(value => ({
+        value: String(value),
+        label: String(field.apiKey === "data" ? fmtDate(value) : value)
+    }));
+
     function selectedFilters() {
-        return Object.fromEntries(Object.entries(filterFields).map(([key, el]) => [key, el.value]));
+        return filterController.values();
     }
 
-    function populateFilters(options) {
-        for (const [key, select] of Object.entries(filterFields)) {
-            const selected = select.value;
-            const values = [...(options[key] || [])];
-
-            select.innerHTML = '<option value="">Todos</option>' + values.map(value => {
-                const label = key === "data" ? fmtDate(value) : key === "status" ? statusLabels[value] : value;
-                return `<option value="${escapeHtml(value)}">${escapeHtml(label || value)}</option>`;
-            }).join("");
-            select.value = values.includes(selected) ? selected : "";
-        }
-    }
-
-    async function reload() {
+    async function reload(refreshOptions = true) {
         const id = ++requestId;
         statusBox.textContent = "Carregando…";
-        document.getElementById("periodoRxp").textContent = els.data.value ? fmtDate(els.data.value) : "";
+        document.getElementById("periodoRxp").textContent = "";
         errorBox.classList.add("hidden");
         closeModal();
         // Não deixa resultados antigos visíveis sob um novo contexto de filtros.
@@ -81,14 +79,10 @@
         els.tbodyUnidades.innerHTML = '<tr><td colspan="6" class="abate-empty">Carregando dados…</td></tr>';
         els.tfootUnidades.innerHTML = "";
         try {
-            const params = selectedFilters();
-            const [data, options] = await Promise.all([
-                apiGet(APP_CONFIG.endpoints.rxp, params),
-                apiGet(APP_CONFIG.endpoints.rxpFiltros, params)
-            ]);
+            if (refreshOptions) await filterController.loadOptions();
             if (id !== requestId) return;
-            populateFilters(options);
-            if (JSON.stringify(params) !== JSON.stringify(selectedFilters())) return reload();
+            const data = await apiGet(APP_CONFIG.endpoints.rxp, selectedFilters());
+            if (id !== requestId) return;
             renderPeriod(data.rows);
             renderKpis(data.rows);
             renderUnits(data.rows);
@@ -184,9 +178,7 @@
 
     function renderPeriod(rows) {
         const dates = [...new Set(rows.map(row => row.data).filter(Boolean))].sort();
-        document.getElementById("periodoRxp").textContent = els.data.value
-            ? fmtDate(els.data.value)
-            : dates.length === 0 ? "Sem datas no período"
+        document.getElementById("periodoRxp").textContent = dates.length === 0 ? "Sem datas no período"
             : dates.length === 1 ? fmtDate(dates[0])
             : `${fmtDate(dates[0])} a ${fmtDate(dates[dates.length - 1])}`;
     }
@@ -328,9 +320,9 @@
         if (event.key === "Escape" && !els.modal.classList.contains("hidden")) closeModal();
     });
 
-    Object.values(filterFields).forEach(el => el.addEventListener("change", reload));
+    filterController.register();
     els.limpar.addEventListener("click", () => {
-        Object.values(filterFields).forEach(el => { el.value = ""; });
+        filterController.clear();
         reload();
     });
     setupFormulaModal();
