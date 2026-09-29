@@ -2,15 +2,23 @@
  * MAPA DE FÓRMULAS: ./FORMULAS.md
  * Gerencia seleção e contexto de filtros; não calcula indicadores.
  */
+// Stateless: dataset and filter state belong to the calling screen.
+window.opcoesDisponiveis = (campo, dataset, filtrosAtivos, corresponde, valor) =>
+    [...new Set(dataset.filter(row => corresponde(row, filtrosAtivos, campo))
+        .map(row => valor(row, campo)).filter(v => v !== null && v !== undefined && String(v).trim() !== "")
+        .map(String))].sort((a, b) => a.localeCompare(b, "pt-BR", { numeric: true }));
+
 class FilterController {
     constructor({
         fields,
         onChange,
         includeDependentRefresh = true,
         contextProvider = null,
-        filtersEndpoint = null
+        filtersEndpoint = null,
+        optionsProvider = null
     }) {
         this.fields = fields;
+        this.optionsProvider = optionsProvider;
         this.onChange = onChange;
         this.includeDependentRefresh = includeDependentRefresh;
         this.contextProvider = contextProvider;
@@ -196,9 +204,6 @@ class FilterController {
             host.classList.toggle("open", open);
             state.button.setAttribute("aria-expanded", String(open));
 
-            if (open && state.search) {
-                state.search.focus();
-            }
         });
 
         state.panel.addEventListener("click", event => {
@@ -241,6 +246,7 @@ normalizeOptions(field, raw) {
         field.apiKey === "mes"
         || field.apiKey === "tipo_linhagem"
         || field.apiKey === "faixa_idade"
+        || field.apiKey === "periodo_dias"
     ) {
         return raw.map(item => ({
             value: String(item.valor),
@@ -261,21 +267,13 @@ normalizeOptions(field, raw) {
         }
 
         // API options are availability, never the source of selected values.
-        const previousOptions = state.displayOptions || state.options;
         state.options = options;
         if (selected !== undefined) {
             state.selected = new Set(this.normalizeArray(selected));
         }
 
-        // Keep unavailable selections visible and removable, retaining their labels.
-        const displayed = new Map(options.map(option => [option.value, option]));
-        state.selected.forEach(value => {
-            if (!displayed.has(value)) {
-                displayed.set(value, previousOptions.find(option => option.value === value)
-                    || { value, label: value });
-            }
-        });
-        options = [...displayed.values()];
+        const available = new Set(options.map(option => option.value));
+        state.selected = new Set([...state.selected].filter(value => available.has(value)));
         state.displayOptions = options;
 
         const allSelected =
@@ -420,7 +418,7 @@ normalizeOptions(field, raw) {
 
         this.refreshController = new AbortController();
 
-        const response = await apiGet(
+        const response = this.optionsProvider ? await this.optionsProvider(current) : await apiGet(
             this.filtersEndpoint,
             current,
             {
@@ -461,9 +459,6 @@ normalizeOptions(field, raw) {
                 const currentValue = latest[field.apiKey]
                     ? String(latest[field.apiKey])
                     : "";
-                if (currentValue && !options.some(option => option.value === currentValue)) {
-                    options.push({ value: currentValue, label: currentValue });
-                }
 
                 select.innerHTML = "";
 
@@ -490,6 +485,9 @@ normalizeOptions(field, raw) {
         }
         finally {
             this.silent = false;
+        }
+        if (JSON.stringify(latest) !== JSON.stringify(this.values())) {
+            return this.loadOptions({ preserve: true });
         }
     }
 

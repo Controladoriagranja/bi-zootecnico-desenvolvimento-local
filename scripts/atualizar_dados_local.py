@@ -7,7 +7,7 @@ from gerar_rxp_local import preparar_rxp
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE_COLUMNS = [
-    "Produtor", "Tipo de Granja", "Modelo", "Técnico", "Galpão.1",
+    "Produtor", "Tipo de Granja", "Modelo", "Técnico", "Galpão",
     "Linhagem", "Vazio", "Data de Abate", "Aves Abatidas",
     "% Mort. Transporte", "% Mortalidade", "Status Acerto", "Peso Médio",
     "Idade", "GMD", "CA", "CAC", "IEP", "CAC REF",

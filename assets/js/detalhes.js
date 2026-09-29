@@ -53,8 +53,7 @@ const inheritedKeys = [
     "status_acerto",
     "tipo_granja",
     "modelo",
-    "tipo_linhagem",
-    "linhagem"
+    "tipo_linhagem"
 ];
 
 
@@ -312,20 +311,24 @@ function render() {
         rankingTecnicosChart,
         detalhesData.ranking_tecnicos,
         metric.nome,
-        metric.unidade
+        metric.unidade,
+        metric.casas_decimais ?? 2
     );
 
     ZooCharts.ranking(
         rankingProdutoresChart,
         detalhesData.ranking_produtores,
         metric.nome,
-        metric.unidade
+        metric.unidade,
+        metric.casas_decimais ?? 2
     );
 
     ZooCharts.evolution(
         evolucaoChart,
         detalhesData.evolucao,
-        metric.nome
+        metric.nome,
+        metric.casas_decimais ?? 2,
+        metric.unidade
     );
 }
 

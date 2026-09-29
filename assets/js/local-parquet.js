@@ -14,7 +14,7 @@
         produtor: "Produtor",
         tecnico: "Técnico",
         linhagem: "Linhagem",
-        galpao: "Galpão.1"
+        galpao: "Galpão"
     };
     const LOTES_DIM = {
         tecnico: "Técnico",
@@ -92,7 +92,7 @@
         for (const [key, col] of Object.entries(DIM)) {
             if (key === exclude) continue;
             const selected = list(filters[key]);
-            if (selected.length && !selected.includes(String(row[col] ?? ""))) return false;
+            if (selected.length && !selected.includes(String(row[col] ?? "").trim())) return false;
         }
         if (exclude !== "tipo_linhagem") {
             const selected = list(filters.tipo_linhagem);
@@ -155,12 +155,12 @@
         const rows = await baseRows();
         const out = {};
         for (const [key, col] of Object.entries(DIM)) {
-            const vals = [...new Set(rows.filter(r => matchBase(r, filters, key)).map(r => String(r[col] ?? "").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+            const vals = opcoesDisponiveis(key, rows, filters, matchBase, r => String(r[col] ?? "").trim());
             out[key] = vals;
         }
-        out.tipo_linhagem = [...new Set(rows.filter(r => matchBase(r, filters, "tipo_linhagem")).map(rowTypeLinhagem).filter(Boolean))].sort().map(v => ({valor:v,nome:v === "mista" ? "Mista" : "Pura"}));
-        out.ano = [...new Set(rows.filter(r => matchBase(r, filters, "ano")).map(r => asDate(r["Data de Abate"] ?? r["Data Abate"])?.getFullYear()).filter(y => y >= 2023))].sort((a,b)=>b-a);
-        out.mes = [...new Set(rows.filter(r => matchBase(r, filters, "mes")).map(r => (asDate(r["Data de Abate"] ?? r["Data Abate"])?.getMonth() ?? -1)+1).filter(m => m>=1))].sort((a,b)=>a-b).map(m=>({valor:m,nome:MESES[m-1]}));
+        out.tipo_linhagem = opcoesDisponiveis("tipo_linhagem", rows, filters, matchBase, rowTypeLinhagem).map(v => ({valor:v,nome:v === "mista" ? "Mista" : "Pura"}));
+        out.ano = opcoesDisponiveis("ano", rows, filters, matchBase, r => asDate(r["Data de Abate"] ?? r["Data Abate"])?.getFullYear()).map(Number).sort((a,b)=>b-a);
+        out.mes = opcoesDisponiveis("mes", rows, filters, matchBase, r => asDate(r["Data de Abate"] ?? r["Data Abate"]).getMonth()+1).map(Number).sort((a,b)=>a-b).map(m=>({valor:m,nome:MESES[m-1]}));
         return out;
     }
 
@@ -328,12 +328,10 @@
         const rows = requireLocalRows("RXP_ROWS", window.RXP_ROWS);
         const out = {};
         for (const [key, field] of Object.entries(RXP_DIM)) {
-            out[key] = [...new Set(rows.filter(r => matchRxp(r, filters, key))
-                .map(r => String(r[field] ?? "")).filter(Boolean))].sort();
+            out[key] = opcoesDisponiveis(key, rows, filters, matchRxp, r => r[field]);
             if (key === "data") out[key].reverse();
         }
-        out.status = [...new Set(rows.filter(r => matchRxp(r, filters, "status"))
-            .map(rxpStatus).filter(Boolean))].sort();
+        out.status = opcoesDisponiveis("status", rows, filters, matchRxp, rxpStatus);
         return out;
     }
 

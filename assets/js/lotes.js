@@ -234,18 +234,23 @@
       selected.includes(range.value) && age >= range.min && age <= range.max);
   }
 
+  function matchesLote(row, f, exclude = null) {
+    return FILTER_FIELDS.every(({ apiKey }) => apiKey === exclude ||
+      (apiKey === "periodo_dias" ? matchesAgeRange(row.idade, f[apiKey]) :
+        includesSelected(f[apiKey], row[apiKey])));
+  }
+
   function filteredRows() {
-    const f = selectedFilters();
-    return state.raw.filter(
-      (row) =>
-        matchesAgeRange(row.idade, f.periodo_dias) &&
-        includesSelected(f.tipo_granja, row.tipo_granja) &&
-        includesSelected(f.produtor, row.produtor) &&
-        includesSelected(f.modelo, row.modelo) &&
-        includesSelected(f.galpao, row.galpao) &&
-        includesSelected(f.tecnico, row.tecnico) &&
-        includesSelected(f.mist_linha, row.mist_linha),
-    );
+    return state.raw.filter(row => matchesLote(row, selectedFilters()));
+  }
+
+  function lotesOptions(filters) {
+    return Object.fromEntries(FILTER_FIELDS.map(({ apiKey }) => {
+      const values = opcoesDisponiveis(apiKey, state.raw, filters, matchesLote, row =>
+        apiKey === "periodo_dias" ? AGE_RANGES.find(r => row.idade >= r.min && row.idade <= r.max)?.value : row[apiKey]);
+      return [apiKey, apiKey === "periodo_dias" ? AGE_RANGES.filter(r => values.includes(r.value))
+        .map(r => ({ valor: r.value, nome: `${r.min}–${r.max} dias` })) : values];
+    }));
   }
 
   function uniqueOptions(values) {
@@ -258,28 +263,18 @@
     state.filters = new FilterController({
       fields: FILTER_FIELDS,
       filtersEndpoint: "local",
-      includeDependentRefresh: false,
+      includeDependentRefresh: true,
+      optionsProvider: lotesOptions,
       onChange: render,
     });
     state.filters.register();
 
-    const optionMap = {
-      periodo_dias: AGE_RANGES.map(range => ({ value: range.value, label: `${range.min}–${range.max} dias` })),
-      tipo_granja: uniqueOptions(state.raw.map((row) => row.tipo_granja)),
-      produtor: uniqueOptions(state.raw.map((row) => row.produtor)),
-      modelo: uniqueOptions(state.raw.map((row) => row.modelo)),
-      galpao: uniqueOptions(state.raw.map((row) => row.galpao)),
-      tecnico: uniqueOptions(state.raw.map((row) => row.tecnico)),
-      mist_linha: [
-        { value: "Pura", label: "Pura" },
-        { value: "Mista", label: "Mista" },
-      ],
-    };
+    const optionMap = lotesOptions({});
 
     FILTER_FIELDS.forEach((field) => {
       state.filters.renderMultiOptions(
         field,
-        optionMap[field.apiKey] || [],
+        state.filters.normalizeOptions(field, optionMap[field.apiKey] || []),
         [],
       );
     });
@@ -739,8 +734,9 @@
     renderTable(rows);
   }
 
-  function clearFilters() {
+  async function clearFilters() {
     state.filters?.clear();
+    await state.filters.loadOptions({ preserve: false });
     render();
   }
 

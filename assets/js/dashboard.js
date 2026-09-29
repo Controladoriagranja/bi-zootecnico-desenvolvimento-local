@@ -40,6 +40,12 @@ const FIRST_FILTERS = [
         multi: true
     },
     {
+        id: "galpao",
+        apiKey: "galpao",
+        search: true,
+        multi: true
+    },
+    {
         id: "tecnico",
         apiKey: "tecnico",
         search: true,
@@ -49,12 +55,6 @@ const FIRST_FILTERS = [
         id: "tipoLinhagem",
         apiKey: "tipo_linhagem",
         search: false,
-        multi: true
-    },
-    {
-        id: "linhagem",
-        apiKey: "linhagem",
-        search: true,
         multi: true
     }
 ];
@@ -542,6 +542,13 @@ function metricCard(
             </tr>
         `).join("");
 
+    const mobileRows = rows.flatMap(row => years.map(year => `
+        <tr><td class="month-cell">${row.monthName}</td><td class="year-cell">${year}</td>
+        <td><a class="metric-value-link" href="${detailUrl(metricId, year, row.monthNumber)}">${formatValue(row.values[String(year)], metric)}</a></td></tr>
+    `)).join("") + years.map(year => `
+        <tr class="total-row"><td class="month-cell">Total</td><td class="year-cell">${year}</td><td>${formatValue(metric.totais?.[String(year)], metric)}</td></tr>
+    `).join("");
+
     const totals =
         years.map(year => `
             <td>
@@ -583,7 +590,7 @@ function metricCard(
         </header>
 
         <div class="metric-table-wrapper">
-            <table class="metric-table">
+            <table class="metric-table metric-table-desktop">
                 <thead>
                     <tr>
                         <th class="month-cell">
@@ -620,6 +627,10 @@ function metricCard(
                         ${totals}
                     </tr>
                 </tbody>
+            </table>
+            <table class="metric-table metric-table-mobile">
+                <thead><tr><th class="month-cell">Mês</th><th class="year-cell">Ano</th><th>Valor</th></tr></thead>
+                <tbody>${mobileRows}</tbody>
             </table>
         </div>
     `;

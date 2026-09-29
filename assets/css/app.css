@@ -2903,3 +2903,34 @@ body.side-nav-open {
 
 .abate-filter-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 14px; margin-left: auto; }
 #periodoRxp { font-size: 14px; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+
+/* Portal: header controls and touch targets. */
+.page-header, .lotes-compact-header { position: relative; padding-right: 52px; }
+.page-header [data-theme-toggle], .lotes-compact-header [data-theme-toggle] { position: absolute; top: 0; right: 0; min-width: 40px; min-height: 40px; }
+button, .mini-button, .icon-button, .details-button, .checkbox-option, .checkbox-multiselect-trigger, .filter-field select { min-height: 40px; }
+.mini-button, .icon-button { min-width: 40px; }
+
+.metric-table-wrapper { max-width: 100%; max-height: 620px; overflow: auto; --month-width: 9ch; }
+.metric-table .month-cell { box-sizing: border-box; width: var(--month-width); min-width: var(--month-width); max-width: var(--month-width); padding: 4px; position: sticky; left: 0; z-index: 2; background: var(--card); box-shadow: 2px 0 3px var(--border); }
+.metric-table thead th { position: sticky; top: 0; z-index: 3; background: var(--card); }
+.metric-table thead .month-cell { z-index: 4; }
+.metric-table-mobile { display: none; }
+@media (max-width: 768px) {
+  .metric-table-desktop { display: none; }
+  .metric-table-mobile { display: table; min-width: 380px; table-layout: fixed; }
+  .metric-table-mobile .year-cell { width: 6ch; position: sticky; left: var(--month-width); background: var(--card); z-index: 2; box-shadow: 2px 0 3px var(--border); }
+  .metric-table-mobile thead .year-cell { z-index: 4; }
+}
+
+#modalAbate .abate-modal-table-wrap { overflow-x: hidden; }
+#modalAbate .abate-detail-table { width: 100%; min-width: 0; table-layout: fixed; }
+#modalAbate .abate-detail-table th, #modalAbate .abate-detail-table td { white-space: normal; overflow-wrap: anywhere; padding: 5px 3px; font-size: 11px; }
+#modalAbate .abate-detail-table .abate-sort-button { white-space: normal; overflow-wrap: anywhere; max-width: 100%; }
+@media (max-width: 768px) {
+  #modalAbate .abate-detail-table, #modalAbate .abate-detail-table tbody { display: block; }
+  #modalAbate .abate-detail-table thead { display: none; }
+  #modalAbate .abate-detail-table tr { display: block; padding: 8px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; }
+  #modalAbate .abate-detail-table td { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 8px; width: auto; text-align: right; padding: 5px 0; font-size: 12px; }
+  #modalAbate .abate-detail-table td::before { content: attr(data-label); font-weight: 600; text-align: left; }
+  #modalAbate .abate-detail-table td > * { min-width: 0; overflow-wrap: anywhere; }
+}

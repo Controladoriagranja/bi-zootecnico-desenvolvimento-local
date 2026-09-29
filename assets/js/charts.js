@@ -40,7 +40,7 @@ window.ZooCharts = (() => {
         if (kind === "ranking") {
             const left = narrow ? Math.max(64, Math.min(100, Math.round(width * 0.3))) : 150;
             return {
-                grid: { left, right: narrow ? 24 : 32, top: 10, bottom: 34 },
+                grid: { left, right: 72, top: 10, bottom: 34 },
                 xAxis: { splitNumber: narrow ? 2 : 5 },
                 yAxis: { axisLabel: { width: left - 14 } }
             };
@@ -115,7 +115,22 @@ window.ZooCharts = (() => {
         return chart;
     }
 
-    function ranking(chart, rows, title, unit = "") {
+    function valueLabels(chart, position, decimals, unit = "") {
+        return {
+            label: { show: true, position, fontSize: 10, color: common().text,
+                formatter: p => {
+                    if (p.value === null || p.value === undefined) return "";
+                    const value = Number(p.value);
+                    const compact = chart.getWidth() < 500 && Math.abs(value) >= 1000;
+                    return value.toLocaleString("pt-BR", compact
+                        ? { notation: "compact", maximumFractionDigits: 1 }
+                        : { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + (unit === "%" ? "%" : "");
+                } },
+            labelLayout: { hideOverlap: true }
+        };
+    }
+
+    function ranking(chart, rows, title, unit = "", decimals = 2) {
         const c = common();
         instances.set(chart, { kind: "ranking", count: rows.length });
 
@@ -125,7 +140,7 @@ window.ZooCharts = (() => {
 
             grid: {
                 left: 150,
-                right: 32,
+                right: 72,
                 top: 10,
                 bottom: 22,
                 containLabel: false
@@ -193,6 +208,7 @@ window.ZooCharts = (() => {
             series: [{
                 type: "bar",
                 data: rows.map(r => r.valor),
+                ...valueLabels(chart, "right", decimals, unit),
                 barWidth: 10,
                 showBackground: true,
                 backgroundStyle: {
@@ -209,7 +225,7 @@ window.ZooCharts = (() => {
         resize(chart);
     }
 
-    function evolution(chart, response, metricName) {
+    function evolution(chart, response, metricName, decimals = 2, unit = "") {
         const c = common();
         instances.set(chart, { kind: "evolution" });
 
@@ -218,6 +234,7 @@ window.ZooCharts = (() => {
                 name: String(serie.ano),
                 type: "bar",
                 data: serie.valores,
+                ...valueLabels(chart, "top", decimals, unit),
                 barMaxWidth: 22,
                 itemStyle: {
                     borderRadius: [6, 6, 0, 0],

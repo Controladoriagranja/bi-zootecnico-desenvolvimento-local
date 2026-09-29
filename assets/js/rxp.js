@@ -61,13 +61,12 @@
         for (const [key, select] of Object.entries(filterFields)) {
             const selected = select.value;
             const values = [...(options[key] || [])];
-            // Preserva a seleção explícita mesmo quando a combinação não tem linhas.
-            if (selected && !values.includes(selected)) values.push(selected);
+
             select.innerHTML = '<option value="">Todos</option>' + values.map(value => {
                 const label = key === "data" ? fmtDate(value) : key === "status" ? statusLabels[value] : value;
                 return `<option value="${escapeHtml(value)}">${escapeHtml(label || value)}</option>`;
             }).join("");
-            select.value = selected;
+            select.value = values.includes(selected) ? selected : "";
         }
     }
 
@@ -89,6 +88,7 @@
             ]);
             if (id !== requestId) return;
             populateFilters(options);
+            if (JSON.stringify(params) !== JSON.stringify(selectedFilters())) return reload();
             renderPeriod(data.rows);
             renderKpis(data.rows);
             renderUnits(data.rows);
@@ -281,9 +281,11 @@
                 <th class="num">${fmt(t.real)}</th>
                 <th class="num"><span class="abate-diff-pill ${diffStateClass(t.diferenca)}">${fmtSigned(t.diferenca)}</span></th>
                 <th class="num">${fmt(t.registrosComDiferenca)}</th>
-                <th></th>
+                <th><button class="mini-button" type="button" data-total-produtores>Ver produtores</button></th>
             </tr>
         `;
+        els.tfootUnidades.querySelector("[data-total-produtores]").addEventListener("click", () =>
+            openUnit({ destino: "Todas as unidades — Total", registros: rows, ...t }));
     }
 
     function openUnit(group) {
@@ -298,16 +300,17 @@
         els.tbodyProdutores.innerHTML = sorted(group.registros, detailSort)
             .map(row => `
                 <tr class="abate-row ${diffStateClass(row.difQtdeRxP)}">
-                    <td><strong>${escapeHtml(row.produtor)}</strong></td>
-                    <td>${escapeHtml(row.tecnico)}</td>
-                    <td>${fmtDate(row.data)}</td>
-                    <td>${escapeHtml(row.galpao)}</td>
-                    <td>${escapeHtml(row.lote)}</td>
-                    <td>${escapeHtml(row.tipoGranja)}</td>
-                    <td>${escapeHtml(row.modelo)}</td>
-                    <td class="num">${fmt(row.programada)}</td>
-                    <td class="num">${fmt(row.real)}</td>
-                    <td class="num"><span class="abate-diff-pill ${diffStateClass(row.difQtdeRxP)}">${fmtSigned(row.difQtdeRxP)}</span></td>
+                    <td data-label="Unidade">${escapeHtml(row.destino)}</td>
+                    <td data-label="Produtor"><strong>${escapeHtml(row.produtor)}</strong></td>
+                    <td data-label="Técnico">${escapeHtml(row.tecnico)}</td>
+                    <td data-label="Data">${fmtDate(row.data)}</td>
+                    <td data-label="Galpão">${escapeHtml(row.galpao)}</td>
+                    <td data-label="Lote">${escapeHtml(row.lote)}</td>
+                    <td data-label="Tipo Granja">${escapeHtml(row.tipoGranja)}</td>
+                    <td data-label="Modelo Aviário">${escapeHtml(row.modelo)}</td>
+                    <td data-label="Qtde Programada" class="num">${fmt(row.programada)}</td>
+                    <td data-label="Qtde Real" class="num">${fmt(row.real)}</td>
+                    <td data-label="Dif Qtde RxP" class="num"><span class="abate-diff-pill ${diffStateClass(row.difQtdeRxP)}">${fmtSigned(row.difQtdeRxP)}</span></td>
                 </tr>
             `).join("");
 
@@ -332,7 +335,7 @@
     });
     setupFormulaModal();
     setupSort(els.tbodyUnidades, ["destino", "programada", "real", "diferenca", "registrosComDiferenca"], unitSort, () => renderUnits(currentRows));
-    setupSort(els.tbodyProdutores, ["produtor", "tecnico", "data", "galpao", "lote", "tipoGranja", "modelo", "programada", "real", "difQtdeRxP"], detailSort, () => { if (currentGroup) openUnit(currentGroup); });
+    setupSort(els.tbodyProdutores, ["destino", "produtor", "tecnico", "data", "galpao", "lote", "tipoGranja", "modelo", "programada", "real", "difQtdeRxP"], detailSort, () => { if (currentGroup) openUnit(currentGroup); });
     reload();
     loadFormulas();
 })();
