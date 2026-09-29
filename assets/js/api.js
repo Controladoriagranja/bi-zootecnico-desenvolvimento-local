@@ -1,4 +1,8 @@
 /**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Transporte HTTP; recebe resultados da API, sem fórmulas de indicadores.
+ */
+/**
  * Cliente HTTP do BI Zootécnico.
  *
  * O navegador recebe JSON da API selecionada em config.js.

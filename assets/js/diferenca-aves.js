@@ -1,3 +1,7 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Protótipo com MOCK_ROWS: somas e contagens; não é o motor dos dados reais RxP.
+ */
 (() => {
     // Protótipo visual. A integração com o Parquet será feita em etapa posterior.
     // Regra importante: Dif Qtde RxP vem pronta da origem e NÃO é recalculada como Real - Programada.
@@ -113,6 +117,13 @@
         });
     }
 
+    /**
+     * FÓRMULA: Totais do protótipo
+     * Usa dados fixos MOCK_ROWS: soma programada, real e difQtdeRxP. Conta difQtdeRxP !== 0.
+     * Diferentemente de RxP real, esta versão não testa null na contagem.
+     * Passo a passo (pseudocódigo):
+     *   somar campos do mock; contar diferenças !== 0
+     */
     function totals(rows) {
         return rows.reduce((acc, row) => {
             acc.programada += row.programada;
@@ -144,6 +155,12 @@
         else els.kpiDiferencaLegenda.textContent = "sem diferença no contexto atual";
     }
 
+    /**
+     * FÓRMULA: Agrupamento do protótipo
+     * Agrupa o mock por destino; totals por grupo; ordem por diferença absoluta decrescente.
+     * Passo a passo (pseudocódigo):
+     *   agrupar por destino; aplicar totals
+     */
     function groupByUnit(rows) {
         const groups = new Map();
         rows.forEach(row => {

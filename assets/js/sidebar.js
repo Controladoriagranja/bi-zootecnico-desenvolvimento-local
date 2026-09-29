@@ -1,3 +1,7 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Navegação, sem fórmulas de indicadores.
+ */
 (() => {
     const current = document.body.dataset.page || "";
 

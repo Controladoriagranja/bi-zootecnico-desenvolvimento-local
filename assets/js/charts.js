@@ -1,3 +1,7 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Desenha rankings/evolução; cálculos de tamanho e layout não são fórmulas zootécnicas.
+ */
 window.ZooCharts = (() => {
     const instances = new Map();
     const compactNumber = new Intl.NumberFormat("pt-BR", {

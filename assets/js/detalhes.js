@@ -1,3 +1,7 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Exibe valor, rankings e evolução recebidos de detalhes; não recalcula médias.
+ */
 const params =
     new URLSearchParams(
         window.location.search

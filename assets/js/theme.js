@@ -1,3 +1,7 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Tema visual, sem fórmulas de indicadores.
+ */
 (() => {
     const STORAGE_KEY = "bi-zootecnico-theme";
 

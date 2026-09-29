@@ -1,3 +1,7 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Exibe resultados de desempenho e abre fórmulas; não calcula médias dos indicadores.
+ */
 const FIRST_FILTERS = [
     {
         id: "ano",

@@ -1,3 +1,7 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Totais e agrupamentos da tela RxP sobre registros já filtrados.
+ */
 (() => {
     const els = {
         data: document.getElementById("filtroData"),
@@ -187,6 +191,14 @@
             : `${fmtDate(dates[0])} a ${fmtDate(dates[dates.length - 1])}`;
     }
 
+    /**
+     * FÓRMULA: Totais da tela RxP
+     * Soma propriedades numéricas programada, real e difQtdeRxP. Conta diferenças não nulas e não zero.
+     * Dados já chegam mapeados; null soma como zero em JavaScript.
+     * Passo a passo (pseudocódigo):
+     *   somar programada, real e difQtdeRxP separadamente
+     *   contar difQtdeRxP != null e != 0
+     */
     function totals(rows) {
         return rows.reduce((acc, row) => {
             acc.programada += row.programada;
@@ -218,6 +230,13 @@
         else els.kpiDiferencaLegenda.textContent = "sem diferença no contexto atual";
     }
 
+    /**
+     * FÓRMULA: Totais por destino
+     * Agrupa registros por destino e chama totals para cada grupo; ordenação inicial pelo valor absoluto
+     * da diferença decrescente.
+     * Passo a passo (pseudocódigo):
+     *   agrupar por destino; calcular totals(registros do destino)
+     */
     function groupByUnit(rows) {
         const groups = new Map();
         rows.forEach(row => {

@@ -1,3 +1,7 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Gerencia seleção e contexto de filtros; não calcula indicadores.
+ */
 class FilterController {
     constructor({
         fields,

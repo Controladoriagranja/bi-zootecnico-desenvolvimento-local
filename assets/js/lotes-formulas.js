@@ -1,5 +1,16 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Textos das oito fórmulas de Lotes; os cálculos executáveis ficam em lotes.js.
+ */
 (() => {
   const WEEKS = [7, 14, 21, 28, 35, 42];
+  /**
+   * FÓRMULA: Catálogo de fórmulas de Lotes
+   * Gera textos dos cinco cards e três gráficos conforme semanas selecionadas. Não calcula os dados;
+   * aponta para as funções documentadas de lotes.js.
+   * Passo a passo (pseudocódigo):
+   *   retornar descrições de contagem, soma, M+D, percentual e médias
+   */
   window.buildLotesFormulas = (selected = WEEKS, filtered = false) => {
     const weeks = WEEKS.filter(week => selected.includes(week));
     const suffix = week => String(week).padStart(2, "0");

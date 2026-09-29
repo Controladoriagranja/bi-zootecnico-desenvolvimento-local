@@ -1,3 +1,7 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Motor local: médias ponderadas do index/detalhes, somas RxP e rota alternativa de lotes.
+ */
 (function () {
     const MESES = [
         "janeiro", "fevereiro", "março", "abril", "maio", "junho",
@@ -33,6 +37,13 @@
         return value;
     }
 
+    /**
+     * FÓRMULA: Conversão numérica
+     * Converte números e textos numéricos; valores inválidos ou ausentes retornam null. É a base para
+     * decidir quais linhas entram nas médias.
+     * Passo a passo (pseudocódigo):
+     *   numero = converter(valor); se inválido: retornar null
+     */
     function n(value) {
         if (value === null || value === undefined || value === "") return null;
         if (typeof value === "number") return Number.isFinite(value) ? value : null;
@@ -67,6 +78,13 @@
         return value.includes("/") ? "mista" : "pura";
     }
 
+    /**
+     * FÓRMULA: Contexto do desempenho
+     * Aplica data de abate, ano a partir de 2023 e filtros de dimensões, mês e intervalo antes das
+     * agregações.
+     * Passo a passo (pseudocódigo):
+     *   linhas = base que atende datas e filtros
+     */
     function matchBase(row, filters = {}, exclude = null) {
         const d = asDate(row["Data de Abate"] ?? row["Data Abate"]);
         if (!d || d.getFullYear() < 2023) return false;
@@ -100,6 +118,21 @@
         return cache.base;
     }
 
+    /**
+     * FÓRMULA: Soma de aves e média ponderada
+     * Aves Abatidas: soma da coluna, ausentes contam zero. Demais indicadores: soma(valor × Aves Abatidas)
+     * / soma(Aves Abatidas) apenas dos pares numéricos válidos. Vazio < 7 ou > 18 vira 14 antes da
+     * multiplicação; esses registros continuam no denominador. Denominador zero retorna null. Percentuais
+     * já estão em %, sem multiplicar por 100.
+     * Passo a passo (pseudocódigo):
+     *   se aves_abatidas: retornar soma([Aves Abatidas])
+     *   numerador = 0; denominador = 0
+     *   para cada linha com valor e aves válidos:
+     *     se indicador == vazio e (valor < 7 ou valor > 18): valor = 14
+     *     numerador += valor * aves
+     *     denominador += aves
+     *   retornar denominador != 0 ? numerador / denominador : null
+     */
     function metricValue(rows, metricId) {
         const metric = window.METRICAS?.[metricId];
         if (!metric) return null;
@@ -131,6 +164,15 @@
         return out;
     }
 
+    /**
+     * FÓRMULA: Mensal e total anual
+     * Reaplica metricValue às linhas de cada mês e de cada ano. O total anual não é a média das médias
+     * mensais.
+     * Passo a passo (pseudocódigo):
+     *   para cada ano:
+     *     total = metricValue(linhas do ano)
+     *     para cada mês: mensal = metricValue(linhas do mês)
+     */
     async function desempenho(filters) {
         const all = await baseRows();
         const rows = all.filter(r => matchBase(r, filters));
@@ -153,6 +195,15 @@
         return {arquivo:"indice_zootecnico_base_dinamica_tratado.parquet",atualizado_em:"Dados locais",anos,meses:MESES.map((nome,i)=>({numero:i+1,nome})),indicadores};
     }
 
+    /**
+     * FÓRMULA: Valor, ranking e evolução
+     * Usa metricValue para o valor geral, grupos por Técnico/Produtor e meses. Rankings excluem valor
+     * null, ordenam decrescente e limitam a 20 grupos. Com o mesmo contexto, o valor coincide com o index.
+     * Passo a passo (pseudocódigo):
+     *   valor = metricValue(linhas filtradas)
+     *   ranking = metricValue(linhas de cada técnico ou produtor)
+     *   evolução = metricValue(linhas de cada ano/mês)
+     */
     async function detalhes(filters) {
         const indicador = String(filters.indicador || "gmd");
         const metric = window.METRICAS[indicador];
@@ -177,6 +228,17 @@
     }
 
     function daysBetween(a,b){ const x=asDate(a),y=asDate(b); if(!x||!y)return null; return Math.floor((y-x)/86400000); }
+    /**
+     * FÓRMULA: Rota alternativa de lotes
+     * Não é o cálculo usado diretamente por lotes.html. Usa maior Data_Analise, última versão por Codigo
+     * Granja + Num Lote + Galp e idade 0..45 relativa à análise. Soma mortes e descartes de 7..42; aves
+     * atuais = máximo(iniciais - mortes - descartes, 0). Mortalidade desta rota usa somente mortes /
+     * iniciais × 100. Peso: primeiro não nulo de 42 até 7, depois Ps Pinto.
+     * Passo a passo (pseudocódigo):
+     *   idade = piso((Data_Analise - Data Recepcao) / 86400000)
+     *   aves_atuais = max(Aves Inicia - mortes - descartes, 0)
+     *   mortalidade = mortes / Aves Inicia * 100
+     */
     async function lotesData(){
         if(cache.lotes)return cache.lotes;
         const raw=await rawLotes();
@@ -219,6 +281,12 @@
     const RXP_DIM = { data: "data", destino: "destino", produtor: "produtor",
         tecnico: "tecnico", tipo_granja: "tipoGranja", modelo: "modelo" };
 
+    /**
+     * FÓRMULA: Status RxP
+     * Classifica Dif Qtde RxP: negativa, positiva, zero; ausente não recebe status.
+     * Passo a passo (pseudocódigo):
+     *   status = sinal(difQtdeRxP)
+     */
     function rxpStatus(row) {
         const value = n(row.difQtdeRxP);
         return value === null ? "" : value < 0 ? "negativa" : value > 0 ? "positiva" : "zero";
@@ -234,6 +302,16 @@
         return !statuses.length || statuses.includes(rxpStatus(row));
     }
 
+    /**
+     * FÓRMULA: Totais RxP da API local
+     * Soma programada, real e difQtdeRxP separadamente; ausentes somam zero. Conta diferenças numéricas
+     * não nulas e diferentes de zero. A diferença vem da origem, não é Real menos Programada.
+     * Passo a passo (pseudocódigo):
+     *   programada = soma(programada)
+     *   real = soma(real)
+     *   diferenca = soma(difQtdeRxP)
+     *   registros = contar(difQtdeRxP válido e != 0)
+     */
     async function rxpData(filters = {}) {
         const rows = requireLocalRows("RXP_ROWS", window.RXP_ROWS).filter(r => matchRxp(r, filters));
         const cards = rows.reduce((acc, r) => {

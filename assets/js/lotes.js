@@ -1,3 +1,7 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Motor da tela Lotes: mortalidade, médias simples semanais, média geral e gráficos.
+ */
 (() => {
   const WEEKS = [7, 14, 21, 28, 35, 42];
   const state = {
@@ -67,6 +71,15 @@
     return result;
   }
 
+  /**
+   * FÓRMULA: Deduplicação e idade
+   * Usa hoje e Data Recepcao para idade em dias inteiros. Mantém 0..45 inclusive. Chave: Codigo Granja +
+   * Num Lote + Galp + recepção; escolhe maior Periodo_Arquivo_Fim (última ocorrência em empate).
+   * Registros sem chave completa recebem identidade por índice.
+   * Passo a passo (pseudocódigo):
+   *   idade = piso((hoje - recepção) / 86400000)
+   *   base = última versão por chave, com 0 <= idade <= 45
+   */
   function prepareRows() {
     const raw = Array.isArray(window.LOTES_ABERTOS_ROWS)
       ? window.LOTES_ABERTOS_ROWS
@@ -118,6 +131,13 @@
       .filter((row) => row.idade !== null && row.idade >= 0 && row.idade <= 45);
   }
 
+  /**
+   * FÓRMULA: Mortes mais descartes de uma semana
+   * Soma Qtde Mort Sem-XX e Qtde Desc Sem-XX do lote. XX = 07, 14, 21, 28, 35 ou 42. Ausentes somam
+   * zero.
+   * Passo a passo (pseudocódigo):
+   *   retornar [Qtde Mort Sem-XX] + [Qtde Desc Sem-XX]
+   */
   function mortalityAtWeek(row, week) {
     const suffix = String(week).padStart(2, "0");
     const mortes = num(row.source[`Qtde Mort Sem-${suffix}`]) || 0;
@@ -125,6 +145,14 @@
     return mortes + descartes;
   }
 
+  /**
+   * FÓRMULA: Mortes mais descartes do período
+   * Soma mortalityAtWeek apenas das semanas selecionadas já atingidas pelo lote.
+   * Passo a passo (pseudocódigo):
+   *   total = 0
+   *   para semana selecionada:
+   *     se idade >= semana: total += mortalityAtWeek(lote, semana)
+   */
   function mortalitySelected(row) {
     return selectedWeeks().reduce(
       (total, week) => total + (week <= row.idade ? mortalityAtWeek(row, week) : 0),
@@ -132,6 +160,14 @@
     );
   }
 
+  /**
+   * FÓRMULA: Média simples da coluna semanal
+   * Usa Peso Med.-XX de lotes com idade >= semana. Descarta null, mantém zero. Soma pesos / quantidade
+   * de pesos válidos. Sem valores retorna null.
+   * Passo a passo (pseudocódigo):
+   *   pesos = valores válidos de [Peso Med.-XX] com idade >= semana
+   *   retornar soma(pesos) / quantidade(pesos), ou null
+   */
   function weeklyWeightMean(rows, week) {
     const column = `Peso Med.-${String(week).padStart(2, "0")}`;
     const values = rows
@@ -143,6 +179,15 @@
       : null;
   }
 
+  /**
+   * FÓRMULA: Peso Médio Geral
+   * Regra atual: média simples das médias semanais válidas. Cada semana tem o mesmo peso
+   * independentemente do número de lotes. Não usa Ps Pinto, nem último peso por lote.
+   * Passo a passo (pseudocódigo):
+   *   medias = weeklyWeightMean(linhas, semana) para cada semana selecionada
+   *   remover medias null
+   *   retornar soma(medias) / quantidade(medias), ou null
+   */
   function generalWeightMean(rows) {
     // 1) calcula a média de cada coluna semanal selecionada;
     // 2) soma essas médias;
@@ -236,6 +281,17 @@
     });
   }
 
+  /**
+   * FÓRMULA: Cards e total da tabela
+   * Conta lotes, soma Aves Inicia uma vez por lote e M+D das semanas elegíveis. Percentual = total M+D /
+   * total aves × 100; peso = generalWeightMean. Denominador zero retorna null.
+   * Passo a passo (pseudocódigo):
+   *   lotes = quantidade(linhas)
+   *   aves = soma(Aves Inicia)
+   *   mortes = soma(mortalitySelected(lote))
+   *   percentual = mortes / aves * 100
+   *   peso = generalWeightMean(linhas)
+   */
   function totals(rows) {
     const aves = rows.reduce((sum, row) => sum + row.aves, 0);
     const mortes = rows.reduce(
@@ -279,6 +335,17 @@
       .join("");
   }
 
+  /**
+   * FÓRMULA: Dados dos gráficos semanais
+   * Em cada semana, soma M+D e Aves Inicia apenas dos lotes que atingiram a idade. Linha percentual =
+   * M+D / aves elegíveis × 100. Peso usa weeklyWeightMean. Remove pontos sem lotes ou sem mortes
+   * positivas e sem peso válido.
+   * Passo a passo (pseudocódigo):
+   *   elegiveis = linhas com idade >= semana
+   *   barra = soma(mortalityAtWeek(lote, semana))
+   *   linha = barra / soma(aves elegíveis) * 100
+   *   peso = weeklyWeightMean(linhas, semana)
+   */
   function weeklyData(rows) {
     return selectedWeeks().map((week) => {
       // Cada ponto usa diretamente a coluna da idade correspondente:
@@ -479,6 +546,14 @@
       true,
     );
 
+    /**
+     * FÓRMULA: Curva de crescimento e peso inicial
+     * Dentro de renderCharts. Sem seleção específica, ponto zero = média simples dos Ps Pinto válidos.
+     * Pontos semanais vêm de weeklyData. Remove pesos null e não extrapola para 45 dias.
+     * Passo a passo (pseudocódigo):
+     *   se todas as semanas: ponto0 = soma(Ps Pinto válidos) / quantidade
+     *   pontos semanais = pesos de weeklyData
+     */
     const growthPoints = [
       ...(!hasWeekSelection() ? [{
         week: 0,
@@ -551,6 +626,18 @@
     );
   }
 
+  /**
+   * FÓRMULA: Agrupamento da tabela
+   * Agrupa por tipo_granja + produtor + linhagem. Soma aves e M+D; recalcula percentual e
+   * generalWeightMean nas linhas de cada grupo. O rodapé usa totals de todas as linhas, não a média dos
+   * grupos.
+   * Passo a passo (pseudocódigo):
+   *   para cada grupo:
+   *     aves = soma(aves)
+   *     mortes = soma(mortalitySelected(lote))
+   *     percentual = mortes / aves * 100
+   *     peso = generalWeightMean(linhas do grupo)
+   */
   function aggregateTable(rows) {
     const groups = new Map();
     rows.forEach((row) => {

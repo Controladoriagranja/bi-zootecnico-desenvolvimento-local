@@ -1,3 +1,7 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Configuração de modo e endpoints, sem fórmulas de indicadores.
+ */
 // Desenvolvimento local. A URL anterior permanece disponível para uso futuro.
 const APP_ENV = "offline"; // offline: sem API; local: FastAPI; tunnel: produção
 const API_URLS = {

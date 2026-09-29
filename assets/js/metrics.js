@@ -1,3 +1,7 @@
+/**
+ * MAPA DE FÓRMULAS: ./FORMULAS.md
+ * Catálogo dos indicadores do index/detalhes, expressões SQL e documentação DAX.
+ */
 const METRICAS = {
     iep: {
         id: "iep",
@@ -219,6 +223,12 @@ const BI_METRIC_ORDER = [
 ];
 
 
+/**
+ * FÓRMULA: Conversão para SQL
+ * Constrói expressão de conversão numérica de uma coluna. Não executa a consulta.
+ * Passo a passo (pseudocódigo):
+ *   expressão = conversão numérica SQL da coluna
+ */
 function sqlNumero(coluna) {
     const c =
         `"${String(coluna).replaceAll('"', '""')}"`;
@@ -239,6 +249,17 @@ function sqlNumero(coluna) {
 }
 
 
+/**
+ * FÓRMULA: Expressões SQL dos indicadores
+ * Gerador auxiliar, sem chamadas nos demais JS atuais. Soma para aves; média ponderada para demais.
+ * Vazio usa CASE para substituir fora de 7..18 por 14 e excluir pares nulos. Para outros indicadores,
+ * o SQL soma todos os pesos no denominador, mesmo se o valor estiver nulo: difere do motor local
+ * nesses casos.
+ * Passo a passo (pseudocódigo):
+ *   aves: SUM(valor)
+ *   vazio: SUM(valor ajustado * peso dos pares válidos) / SUM(pesos dos pares válidos)
+ *   outros: SUM(valor * peso) / SUM(peso)
+ */
 function sqlMetrica(metricId) {
     const metrica =
         METRICAS[metricId];
@@ -291,6 +312,14 @@ function sqlMetrica(metricId) {
 
 
 // Documentação do cálculo local com os nomes físicos das colunas.
+/**
+ * FÓRMULA: Fórmulas finais e DAX exibido
+ * Enriquece o catálogo e sobrescreve formula_exibicao/formula_dax iniciais. DAX é referência textual,
+ * não executado no navegador. Exclui pares ausentes e anos anteriores a 2023; aplica Vazio ajustado
+ * antes de ponderar.
+ * Passo a passo (pseudocódigo):
+ *   para indicador: gerar texto, colunas, passos e DAX de referência
+ */
 Object.values(METRICAS).forEach(metric => {
     metric.colunas = [...new Set([metric.coluna, metric.ponderador].filter(Boolean))];
     if (metric.tipo_calculo === "soma") {
