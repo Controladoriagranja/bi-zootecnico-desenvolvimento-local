@@ -151,7 +151,7 @@ registros = contar(difQtdeRxP válido e != 0)
 
 ### lotes.js — Deduplicação e idade
 
-Local: [lotes.js](lotes.js), linha **83**, trecho **`function prepareRows() {`**.
+Local: [lotes.js](lotes.js), linha **92**, trecho **`function prepareRows() {`**.
 
 Usa hoje e Data Recepcao para idade em dias inteiros. Mantém 0..45 inclusive. Chave: Codigo Granja + Num Lote + Galp + recepção; escolhe maior Periodo_Arquivo_Fim (última ocorrência em empate). Registros sem chave completa recebem identidade por índice.
 
@@ -162,7 +162,7 @@ base = última versão por chave, com 0 <= idade <= 45
 
 ### lotes.js — Mortes mais descartes de uma semana
 
-Local: [lotes.js](lotes.js), linha **141**, trecho **`function mortalityAtWeek(row, week) {`**.
+Local: [lotes.js](lotes.js), linha **150**, trecho **`function mortalityAtWeek(row, week) {`**.
 
 Soma Qtde Mort Sem-XX e Qtde Desc Sem-XX do lote. XX = 07, 14, 21, 28, 35 ou 42. Ausentes somam zero.
 
@@ -172,19 +172,19 @@ retornar [Qtde Mort Sem-XX] + [Qtde Desc Sem-XX]
 
 ### lotes.js — Mortes mais descartes do período
 
-Local: [lotes.js](lotes.js), linha **156**, trecho **`function mortalitySelected(row) {`**.
+Local: [lotes.js](lotes.js), linha **165**, trecho **`function mortalitySelected(row) {`**.
 
-Soma mortalityAtWeek apenas das semanas selecionadas já atingidas pelo lote.
+Soma mortalityAtWeek apenas das semanas disponíveis já atingidas pelo lote.
 
 ```text
 total = 0
-para semana selecionada:
+para semana disponível:
   se idade >= semana: total += mortalityAtWeek(lote, semana)
 ```
 
 ### lotes.js — Média simples da coluna semanal
 
-Local: [lotes.js](lotes.js), linha **171**, trecho **`function weeklyWeightMean(rows, week) {`**.
+Local: [lotes.js](lotes.js), linha **180**, trecho **`function weeklyWeightMean(rows, week) {`**.
 
 Usa Peso Med.-XX de lotes com idade >= semana. Descarta null, mantém zero. Soma pesos / quantidade de pesos válidos. Sem valores retorna null.
 
@@ -195,19 +195,19 @@ retornar soma(pesos) / quantidade(pesos), ou null
 
 ### lotes.js — Peso Médio Geral
 
-Local: [lotes.js](lotes.js), linha **191**, trecho **`function generalWeightMean(rows) {`**.
+Local: [lotes.js](lotes.js), linha **200**, trecho **`function generalWeightMean(rows) {`**.
 
 Regra atual: média simples das médias semanais válidas. Cada semana tem o mesmo peso independentemente do número de lotes. Não usa Ps Pinto, nem último peso por lote.
 
 ```text
-medias = weeklyWeightMean(linhas, semana) para cada semana selecionada
+medias = weeklyWeightMean(linhas, semana) para cada semana disponível
 remover medias null
 retornar soma(medias) / quantidade(medias), ou null
 ```
 
 ### lotes.js — Cards e total da tabela
 
-Local: [lotes.js](lotes.js), linha **295**, trecho **`function totals(rows) {`**.
+Local: [lotes.js](lotes.js), linha **299**, trecho **`function totals(rows) {`**.
 
 Conta lotes, soma Aves Inicia uma vez por lote e M+D das semanas elegíveis. Percentual = total M+D / total aves × 100; peso = generalWeightMean. Denominador zero retorna null.
 
@@ -221,7 +221,7 @@ peso = generalWeightMean(linhas)
 
 ### lotes.js — Dados dos gráficos semanais
 
-Local: [lotes.js](lotes.js), linha **349**, trecho **`function weeklyData(rows) {`**.
+Local: [lotes.js](lotes.js), linha **353**, trecho **`function weeklyData(rows) {`**.
 
 Em cada semana, soma M+D e Aves Inicia apenas dos lotes que atingiram a idade. Linha percentual = M+D / aves elegíveis × 100. Peso usa weeklyWeightMean. Remove pontos sem lotes ou sem mortes positivas e sem peso válido.
 
@@ -234,7 +234,7 @@ peso = weeklyWeightMean(linhas, semana)
 
 ### lotes.js — Curva de crescimento e peso inicial
 
-Local: [lotes.js](lotes.js), linha **557**, trecho **`const growthPoints = [`**.
+Local: [lotes.js](lotes.js), linha **561**, trecho **`const growthPoints = [`**.
 
 Dentro de renderCharts. Sem seleção específica, ponto zero = média simples dos Ps Pinto válidos. Pontos semanais vêm de weeklyData. Remove pesos null e não extrapola para 45 dias.
 
@@ -245,7 +245,7 @@ pontos semanais = pesos de weeklyData
 
 ### lotes.js — Agrupamento da tabela
 
-Local: [lotes.js](lotes.js), linha **641**, trecho **`function aggregateTable(rows) {`**.
+Local: [lotes.js](lotes.js), linha **645**, trecho **`function aggregateTable(rows) {`**.
 
 Agrupa por tipo_granja + produtor + linhagem. Soma aves e M+D; recalcula percentual e generalWeightMean nas linhas de cada grupo. O rodapé usa totals de todas as linhas, não a média dos grupos.
 
@@ -293,7 +293,7 @@ para indicador: gerar texto, colunas, passos e DAX de referência
 
 Local: [lotes-formulas.js](lotes-formulas.js), linha **14**, trecho **`window.buildLotesFormulas = (selected = WEEKS, filtered = false) => {`**.
 
-Gera textos dos cinco cards e três gráficos conforme semanas selecionadas. Não calcula os dados; aponta para as funções documentadas de lotes.js.
+Gera textos dos cinco cards e três gráficos conforme semanas disponíveis. Não calcula os dados; aponta para as funções documentadas de lotes.js.
 
 ```text
 retornar descrições de contagem, soma, M+D, percentual e médias
@@ -385,3 +385,7 @@ Os itens definem nomes e colunas. Em metrics.js, as expressões finais são gera
 | [rxp-formulas.js](rxp-formulas.js) | diferenca | 35 |
 | [rxp-formulas.js](rxp-formulas.js) | registros | 49 |
 | [rxp-formulas.js](rxp-formulas.js) | tecnico | 63 |
+
+## Filtro de idade atual (atualização)
+
+Em lotes.js, AGE_RANGES e matchesAgeRange selecionam faixas inclusivas 0–7, 8–14, 15–21, 22–28, 29–35, 36–42 e 43–45. Seleções múltiplas unem as faixas sem duplicação. Todos os filtros de dimensões são combinados por interseção. Cards, gráficos e tabela recebem as mesmas linhas filtradas. Os cálculos usam as colunas semanais até 42 dias, somente quando o lote atingiu a semana; não existe coluna de 45 dias.

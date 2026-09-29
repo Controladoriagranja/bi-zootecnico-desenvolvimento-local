@@ -4,6 +4,15 @@
  */
 (() => {
   const WEEKS = [7, 14, 21, 28, 35, 42];
+  const AGE_RANGES = [
+    { value: "7", min: 0, max: 7 },
+    { value: "14", min: 8, max: 14 },
+    { value: "21", min: 15, max: 21 },
+    { value: "28", min: 22, max: 28 },
+    { value: "35", min: 29, max: 35 },
+    { value: "42", min: 36, max: 42 },
+    { value: "45", min: 43, max: 45 },
+  ];
   const state = {
     raw: [],
     rows: [],
@@ -147,14 +156,14 @@
 
   /**
    * FÓRMULA: Mortes mais descartes do período
-   * Soma mortalityAtWeek apenas das semanas selecionadas já atingidas pelo lote.
+   * Soma mortalityAtWeek apenas das semanas disponíveis já atingidas pelo lote.
    * Passo a passo (pseudocódigo):
    *   total = 0
-   *   para semana selecionada:
+   *   para semana disponível:
    *     se idade >= semana: total += mortalityAtWeek(lote, semana)
    */
   function mortalitySelected(row) {
-    return selectedWeeks().reduce(
+    return WEEKS.reduce(
       (total, week) => total + (week <= row.idade ? mortalityAtWeek(row, week) : 0),
       0,
     );
@@ -184,7 +193,7 @@
    * Regra atual: média simples das médias semanais válidas. Cada semana tem o mesmo peso
    * independentemente do número de lotes. Não usa Ps Pinto, nem último peso por lote.
    * Passo a passo (pseudocódigo):
-   *   medias = weeklyWeightMean(linhas, semana) para cada semana selecionada
+   *   medias = weeklyWeightMean(linhas, semana) para cada semana disponível
    *   remover medias null
    *   retornar soma(medias) / quantidade(medias), ou null
    */
@@ -193,7 +202,7 @@
     // 2) soma essas médias;
     // 3) divide pela quantidade de semanas com média válida.
     // `rows` já contém todos os filtros ativos da tela.
-    const weeklyMeans = selectedWeeks()
+    const weeklyMeans = WEEKS
       .map((week) => weeklyWeightMean(rows, week))
       .filter((value) => value !== null);
     return weeklyMeans.length
@@ -219,22 +228,17 @@
     return !selected?.length || selected.includes(String(value));
   }
 
-  function selectedWeeks() {
-    const selected = selectedFilters().periodo_dias;
-    return selected?.length
-      ? WEEKS.filter(week => selected.includes(String(week)))
-      : WEEKS;
-  }
-
-  function hasWeekSelection() {
-    return selectedWeeks().length !== WEEKS.length;
+  // Faixas inclusivas e sem sobreposição; várias seleções formam uma união.
+  function matchesAgeRange(age, selected) {
+    return !selected?.length || AGE_RANGES.some(range =>
+      selected.includes(range.value) && age >= range.min && age <= range.max);
   }
 
   function filteredRows() {
     const f = selectedFilters();
     return state.raw.filter(
       (row) =>
-        (!hasWeekSelection() || selectedWeeks().some(week => row.idade >= week)) &&
+        matchesAgeRange(row.idade, f.periodo_dias) &&
         includesSelected(f.tipo_granja, row.tipo_granja) &&
         includesSelected(f.produtor, row.produtor) &&
         includesSelected(f.modelo, row.modelo) &&
@@ -260,7 +264,7 @@
     state.filters.register();
 
     const optionMap = {
-      periodo_dias: WEEKS.map(week => ({ value: String(week), label: `${week} dias` })),
+      periodo_dias: AGE_RANGES.map(range => ({ value: range.value, label: `${range.min}–${range.max} dias` })),
       tipo_granja: uniqueOptions(state.raw.map((row) => row.tipo_granja)),
       produtor: uniqueOptions(state.raw.map((row) => row.produtor)),
       modelo: uniqueOptions(state.raw.map((row) => row.modelo)),
@@ -347,7 +351,7 @@
    *   peso = weeklyWeightMean(linhas, semana)
    */
   function weeklyData(rows) {
-    return selectedWeeks().map((week) => {
+    return WEEKS.map((week) => {
       // Cada ponto usa diretamente a coluna da idade correspondente:
       // Peso Med.-07, Peso Med.-14 ... e Mortalidade = Mortes + Descartes da mesma semana.
       const eligible = rows.filter((row) => row.idade >= week);
@@ -548,14 +552,14 @@
 
     /**
      * FÓRMULA: Curva de crescimento e peso inicial
-     * Dentro de renderCharts. Sem seleção específica, ponto zero = média simples dos Ps Pinto válidos.
+     * Dentro de renderCharts. Ponto zero = média simples dos Ps Pinto válidos.
      * Pontos semanais vêm de weeklyData. Remove pesos null e não extrapola para 45 dias.
      * Passo a passo (pseudocódigo):
      *   se todas as semanas: ponto0 = soma(Ps Pinto válidos) / quantidade
      *   pontos semanais = pesos de weeklyData
      */
     const growthPoints = [
-      ...(!hasWeekSelection() ? [{
+      ...[{
         week: 0,
         label: "0",
         value: (() => {
@@ -564,7 +568,7 @@
             .filter((v) => v !== null);
           return ps.length ? ps.reduce((a, b) => a + b, 0) / ps.length : null;
         })(),
-      }] : []),
+      }],
       ...weekly.map((x) => ({
         week: x.week,
         label: String(x.week),
@@ -754,7 +758,7 @@
     document.addEventListener("click", event => {
       const button = event.target.closest("[data-lotes-formula]");
       if (!button) return;
-      const metric = buildLotesFormulas(selectedWeeks(), hasWeekSelection()).find(item => item.id === button.dataset.lotesFormula);
+      const metric = buildLotesFormulas().find(item => item.id === button.dataset.lotesFormula);
       if (!metric) return;
       opener = button;
       $("formulaTituloLotes").textContent = metric.nome;
