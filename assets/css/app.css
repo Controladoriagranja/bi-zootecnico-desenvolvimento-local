@@ -2914,12 +2914,8 @@ button, .mini-button, .icon-button, .details-button, .checkbox-option, .checkbox
 .metric-table .month-cell { box-sizing: border-box; width: var(--month-width); min-width: var(--month-width); max-width: var(--month-width); padding: 4px; position: sticky; left: 0; z-index: 2; background: var(--card); box-shadow: 2px 0 3px var(--border); }
 .metric-table thead th { position: sticky; top: 0; z-index: 3; background: var(--card); }
 .metric-table thead .month-cell { z-index: 4; }
-.metric-table-mobile { display: none; }
 @media (max-width: 768px) {
-  .metric-table-desktop { display: none; }
-  .metric-table-mobile { display: table; min-width: 380px; table-layout: fixed; }
-  .metric-table-mobile .year-cell { width: 6ch; position: sticky; left: var(--month-width); background: var(--card); z-index: 2; box-shadow: 2px 0 3px var(--border); }
-  .metric-table-mobile thead .year-cell { z-index: 4; }
+  .metric-table-desktop { display: table; min-width: 480px; }
 }
 
 #modalAbate .abate-modal-table-wrap { overflow-x: hidden; }

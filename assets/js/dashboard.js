@@ -542,13 +542,6 @@ function metricCard(
             </tr>
         `).join("");
 
-    const mobileRows = rows.flatMap(row => years.map(year => `
-        <tr><td class="month-cell">${row.monthName}</td><td class="year-cell">${year}</td>
-        <td><a class="metric-value-link" href="${detailUrl(metricId, year, row.monthNumber)}">${formatValue(row.values[String(year)], metric)}</a></td></tr>
-    `)).join("") + years.map(year => `
-        <tr class="total-row"><td class="month-cell">Total</td><td class="year-cell">${year}</td><td>${formatValue(metric.totais?.[String(year)], metric)}</td></tr>
-    `).join("");
-
     const totals =
         years.map(year => `
             <td>
@@ -627,10 +620,6 @@ function metricCard(
                         ${totals}
                     </tr>
                 </tbody>
-            </table>
-            <table class="metric-table metric-table-mobile">
-                <thead><tr><th class="month-cell">Mês</th><th class="year-cell">Ano</th><th>Valor</th></tr></thead>
-                <tbody>${mobileRows}</tbody>
             </table>
         </div>
     `;
