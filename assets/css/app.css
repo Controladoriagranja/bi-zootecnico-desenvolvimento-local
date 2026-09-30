@@ -2164,6 +2164,80 @@ body.side-nav-open {
   color: #fff;
   font-size: 14px;
 }
+.lotes-history-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: 5px;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.lotes-history-link:hover,
+.lotes-history-link:focus-visible { background: color-mix(in srgb, var(--primary) 10%, transparent); }
+.lotes-history-link strong {
+  display: inline-grid;
+  place-items: center;
+  min-width: 29px;
+  height: 29px;
+  margin-left: 7px;
+  padding: 0 7px;
+  border-radius: 4px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 14px;
+}
+.history-current-label { color: var(--primary); font-size: 11px; font-weight: 800; white-space: nowrap; }
+.history-shell { width: min(1880px, calc(100% - 28px)); padding-top: 14px; }
+.history-filter-card { margin-bottom: 14px; }
+.history-filters { display: grid; grid-template-columns: repeat(6, minmax(120px, 1fr)); gap: 12px; }
+.history-filter-field { display: grid; gap: 4px; min-width: 0; }
+.history-filter-field span { color: var(--muted-foreground); font-size: 10px; font-weight: 720; }
+.history-multi-select { position: relative; min-width: 0; }
+.history-multi-select summary { display: flex; align-items: center; justify-content: space-between; min-height: 40px; padding: 0 10px; border: 1px solid var(--border); border-radius: 5px; background: var(--card); color: var(--foreground); font-size: 12px; cursor: pointer; list-style: none; }
+.history-multi-select summary::-webkit-details-marker { display: none; }
+.history-multi-select summary::after { content: "⌄"; color: var(--muted-foreground); font-size: 12px; }
+.history-multi-select[open] summary { border-color: var(--primary); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.history-multi-menu { position: absolute; z-index: 8; top: 100%; left: 0; right: 0; max-height: 250px; overflow: auto; padding: 6px; border: 1px solid var(--primary); border-top: 0; border-radius: 0 0 5px 5px; background: var(--card); box-shadow: 0 8px 20px rgba(0,0,0,.12); }
+.history-multi-menu label { display: flex; align-items: center; gap: 7px; min-height: 28px; padding: 3px 5px; color: var(--foreground); font-size: 11px; cursor: pointer; }
+.history-multi-menu label:hover { background: color-mix(in srgb, var(--primary) 8%, var(--card)); }
+.history-multi-menu input { accent-color: var(--primary); }
+.history-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+.history-kpi { padding: 14px 16px; border-top: 2px solid var(--primary); }
+.history-kpi span { color: var(--muted-foreground); font-size: 11px; }
+.history-kpi strong { display: block; margin-top: 5px; color: var(--foreground); font-size: 22px; font-variant-numeric: tabular-nums; }
+.history-table-card { overflow: hidden; }
+.history-table-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 15px 16px; border-bottom: 1px solid var(--border); }
+.history-table-heading h2 { margin: 0; font-size: 15px; }
+.history-table-heading p { margin: 4px 0 0; color: var(--muted-foreground); font-size: 12px; }
+.history-year-filter { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.history-year-button { min-width: 52px; min-height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: 5px; background: var(--card); color: var(--muted-foreground); font: inherit; font-size: 11px; font-weight: 750; cursor: pointer; }
+.history-year-button:hover, .history-year-button:focus-visible { border-color: var(--primary); color: var(--primary); }
+.history-year-button.active { border-color: var(--primary); background: var(--primary); color: #fff; }
+.history-source { color: var(--primary); font-size: 11px; font-weight: 750; }
+.history-table-wrap { max-width: 100%; overflow: auto; }
+.history-table { width: 100%; min-width: 2100px; border-collapse: collapse; font-size: 12px; }
+.history-table th, .history-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+.history-table thead th { position: sticky; top: 0; z-index: 1; background: var(--card); color: var(--muted-foreground); font-size: 11px; font-weight: 700; }
+.history-table th.num, .history-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.history-table tbody tr:hover td { background: color-mix(in srgb, var(--primary) 5%, var(--card)); }
+.history-table tfoot th { background: var(--card); font-weight: 800; }
+.history-sort { min-height: 28px; padding: 3px 0; border: 0; background: transparent; color: inherit; font: inherit; font-weight: inherit; cursor: pointer; }
+.history-sort span { color: var(--muted-foreground); margin-left: 4px; }
+.history-sort.active { color: var(--primary); }
+.history-expand { display: inline-flex; align-items: center; gap: 8px; min-height: 30px; padding: 0; border: 0; background: transparent; color: var(--foreground); font: inherit; text-align: left; cursor: pointer; }
+.history-expand span:first-child { display: inline-grid; place-items: center; width: 17px; height: 17px; border: 1px solid var(--border); border-radius: 3px; color: var(--primary); font-weight: 800; }
+.history-level-0 td { background: color-mix(in srgb, var(--primary) 7%, var(--card)); font-weight: 800; }
+.history-level-1 td { background: color-mix(in srgb, var(--primary) 3%, var(--card)); font-weight: 650; }
+.history-level-1 td:first-child { padding-left: 34px; }
+.history-level-2 td:first-child { padding-left: 58px; }
+.history-level-3 td:first-child { padding-left: 84px; color: var(--muted-foreground); }
+.history-empty { padding: 32px !important; color: var(--muted-foreground); text-align: center !important; }
+@media (max-width: 980px) { .history-filters { grid-template-columns: repeat(3, minmax(120px, 1fr)); } .history-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .history-filters { grid-template-columns: 1fr; } .history-kpis { grid-template-columns: 1fr 1fr; gap: 8px; } .history-kpi { padding: 11px; } .history-kpi strong { font-size: 18px; } .history-header .card-actions { gap: 4px; } .history-table-heading { align-items: flex-start; flex-direction: column; } .history-year-filter { width: 100%; } .history-year-button { flex: 1; } }
 .lotes-filter-strip {
   padding: 10px 12px;
   border-radius: 8px;
@@ -2818,7 +2892,7 @@ body.side-nav-open {
 
 .abate-modal-summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 12px;
 }
@@ -2929,4 +3003,308 @@ button, .mini-button, .icon-button, .details-button, .checkbox-option, .checkbox
   #modalAbate .abate-detail-table td { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 8px; width: auto; text-align: right; padding: 5px 0; font-size: 12px; }
   #modalAbate .abate-detail-table td::before { content: attr(data-label); font-weight: 600; text-align: left; }
   #modalAbate .abate-detail-table td > * { min-width: 0; overflow-wrap: anywhere; }
+}
+
+/* Histórico: alternância entre Mortalidade e Peso */
+.history-table-heading-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+.history-view-filter { display: inline-flex; align-items: center; gap: 3px; padding: 3px; border: 1px solid var(--border); border-radius: 7px; background: color-mix(in srgb, var(--muted) 55%, transparent); }
+.history-view-button { min-height: 30px; padding: 0 11px; border: 0; border-radius: 5px; background: transparent; color: var(--muted-foreground); font: inherit; font-size: 11px; font-weight: 750; cursor: pointer; }
+.history-view-button:hover, .history-view-button:focus-visible { color: var(--primary); }
+.history-view-button.active { background: var(--card); color: var(--primary); box-shadow: 0 1px 3px color-mix(in srgb, var(--foreground) 12%, transparent); }
+.history-table[data-view="mortality"] { min-width: 2320px; }
+.history-table[data-view="weight"] { min-width: 1460px; }
+@media (max-width: 640px) {
+  .history-table-heading-actions { width: 100%; justify-content: stretch; }
+  .history-view-filter { width: 100%; }
+  .history-view-button { flex: 1; }
+}
+
+
+/* Histórico de lotes — ajustes visuais v4 */
+.history-page {
+  --history-combined-col-bg: color-mix(in srgb, var(--primary) 8%, var(--card));
+  --history-combined-col-hover-bg: color-mix(in srgb, var(--primary) 12%, var(--card));
+  --history-row-odd-bg: color-mix(in srgb, var(--primary) 1.5%, var(--card));
+  --history-row-even-bg: color-mix(in srgb, var(--secondary) 6%, var(--card));
+}
+[data-theme="dark"] .history-page {
+  --history-combined-col-bg: color-mix(in srgb, var(--primary) 18%, var(--card));
+  --history-combined-col-hover-bg: color-mix(in srgb, var(--primary) 24%, var(--card));
+  --history-row-odd-bg: color-mix(in srgb, var(--foreground) 3%, var(--card));
+  --history-row-even-bg: color-mix(in srgb, var(--foreground) 6%, var(--card));
+}
+.history-shell { width: min(100%, calc(100% - 28px)); max-width: 100%; }
+.history-table-card { overflow: hidden; }
+.history-table-wrap { max-width: 100%; overflow-x: clip; overflow-y: auto; }
+.history-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+  font-size: 11px;
+}
+.history-table th,
+.history-table td {
+  padding: 9px 8px;
+  white-space: nowrap;
+}
+.history-table thead th {
+  font-size: 10px;
+  line-height: 1.2;
+}
+.history-table th:nth-child(1),
+.history-table td:nth-child(1) { width: 18%; }
+.history-table th:nth-child(2),
+.history-table td:nth-child(2) { width: 7%; }
+.history-table th:nth-child(3),
+.history-table td:nth-child(3) { width: 8%; }
+.history-table th:nth-child(n + 4),
+.history-table td:nth-child(n + 4) { width: 4.45%; }
+.history-table tbody tr:nth-child(odd) td { background: var(--history-row-odd-bg); }
+.history-table tbody tr:nth-child(even) td { background: var(--history-row-even-bg); }
+.history-table tbody tr.history-level-0 td { background: color-mix(in srgb, var(--primary) 8%, var(--history-row-odd-bg)); font-weight: 800; }
+.history-table tbody tr.history-level-1 td { background: color-mix(in srgb, var(--primary) 5%, var(--history-row-even-bg)); font-weight: 700; }
+.history-table tbody tr.history-level-2 td { background: color-mix(in srgb, var(--primary) 3%, var(--history-row-odd-bg)); }
+.history-table tbody tr.history-level-3 td { background: var(--history-row-even-bg); }
+.history-table .history-col-combined { background: var(--history-combined-col-bg) !important; }
+.history-table tbody tr:hover td { background: color-mix(in srgb, var(--primary) 6%, var(--card)); }
+.history-table tbody tr:hover td.history-col-combined { background: var(--history-combined-col-hover-bg) !important; }
+.history-table tfoot th { background: color-mix(in srgb, var(--primary) 4%, var(--card)); }
+.history-table tfoot .history-col-combined { background: var(--history-combined-col-bg); }
+.history-expand { gap: 6px; width: 100%; }
+.history-expand span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.history-level-1 td:first-child { padding-left: 24px; }
+.history-level-2 td:first-child { padding-left: 40px; }
+.history-level-3 td:first-child { padding-left: 54px; }
+@media (max-width: 1380px) {
+  .history-table { font-size: 10px; }
+  .history-table th,
+  .history-table td { padding: 8px 6px; }
+}
+@media (max-width: 980px) {
+  .history-table-wrap { overflow-x: auto; }
+  .history-table { min-width: 980px; table-layout: auto; }
+}
+
+/* Histórico: identificação fixa e rolagem restrita à tabela. */
+.history-table-wrap { overflow: auto; max-height: 70vh; isolation: isolate; }
+.history-table[data-view="mortality"],
+.history-table[data-view="weight"] { min-width: 1480px; table-layout: auto; font-size: 12px; border-collapse: separate; border-spacing: 0; }
+.history-table[data-view="weight"] { min-width: 1120px; }
+.history-table th, .history-table td { padding: 10px 12px; line-height: 1.45; }
+.history-table th:first-child, .history-table td:first-child { width: 220px; min-width: 220px; max-width: 220px; position: sticky; left: 0; z-index: 2; box-shadow: 3px 0 5px -3px var(--muted-foreground); }
+.history-table thead th { top: 0; z-index: 3; font-size: 12px; color: var(--foreground); border-bottom: 2px solid var(--border); }
+.history-table thead th:first-child { z-index: 4; }
+.history-table tfoot th { border-top: 2px solid var(--border); }
+.history-table .history-sort, .history-table .history-expand { min-height: 40px; }
+.history-table .history-expand { white-space: normal; overflow-wrap: anywhere; }
+.history-table .history-expand span:first-child { flex: 0 0 22px; height: 22px; border-radius: 6px; background: var(--card); }
+.history-table .history-expand span:last-child { overflow: visible; }
+.history-table .history-expand[aria-expanded="true"] { font-weight: 800; }
+.history-table .history-expand:focus-visible, .history-table .history-sort:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.history-table tbody tr.history-level-0 td { border-top: 2px solid var(--border); }
+.history-table[data-view="mortality"] th:nth-child(3n + 4), .history-table[data-view="mortality"] td:nth-child(3n + 4) { border-left: 1px solid var(--border); }
+@media (max-width: 768px) {
+  .history-table th:first-child, .history-table td:first-child { width: 160px; min-width: 160px; max-width: 160px; }
+  .history-table th, .history-table td { padding-top: 8px; padding-bottom: 8px; }
+  .history-table .history-level-1 td:first-child { padding-left: 18px; }
+  .history-table .history-level-2 td:first-child { padding-left: 28px; }
+  .history-table .history-level-3 td:first-child { padding-left: 38px; }
+}
+
+
+/* Histórico de lotes — refinamento visual v5 */
+.history-page {
+  --history-row-odd-bg: color-mix(in srgb, var(--card) 90%, var(--muted) 10%);
+  --history-row-even-bg: color-mix(in srgb, var(--card) 84%, var(--muted) 16%);
+  --history-combined-col-odd-bg: color-mix(in srgb, var(--primary) 9%, var(--history-row-odd-bg));
+  --history-combined-col-even-bg: color-mix(in srgb, var(--primary) 13%, var(--history-row-even-bg));
+  --history-combined-col-head-bg: color-mix(in srgb, var(--primary) 11%, var(--card));
+  --history-combined-col-hover-bg: color-mix(in srgb, var(--primary) 16%, var(--card));
+}
+[data-theme="dark"] .history-page {
+  --history-row-odd-bg: color-mix(in srgb, var(--card) 92%, var(--foreground) 8%);
+  --history-row-even-bg: color-mix(in srgb, var(--card) 86%, var(--foreground) 14%);
+  --history-combined-col-odd-bg: color-mix(in srgb, var(--primary) 20%, var(--history-row-odd-bg));
+  --history-combined-col-even-bg: color-mix(in srgb, var(--primary) 24%, var(--history-row-even-bg));
+  --history-combined-col-head-bg: color-mix(in srgb, var(--primary) 22%, var(--card));
+  --history-combined-col-hover-bg: color-mix(in srgb, var(--primary) 28%, var(--card));
+}
+.history-table tbody tr:nth-child(odd) td { background: var(--history-row-odd-bg); }
+.history-table tbody tr:nth-child(even) td { background: var(--history-row-even-bg); }
+.history-table thead th.history-col-combined,
+.history-table tfoot .history-col-combined {
+  background: var(--history-combined-col-head-bg);
+  color: var(--primary);
+}
+.history-table tbody tr:nth-child(odd) td.history-col-combined {
+  background: var(--history-combined-col-odd-bg) !important;
+  color: var(--primary);
+  font-weight: 700;
+}
+.history-table tbody tr:nth-child(even) td.history-col-combined {
+  background: var(--history-combined-col-even-bg) !important;
+  color: var(--primary);
+  font-weight: 700;
+}
+.history-table tbody tr:hover td.history-col-combined {
+  background: var(--history-combined-col-hover-bg) !important;
+}
+.history-table tbody tr.history-level-0 td.history-col-combined {
+  background: color-mix(in srgb, var(--primary) 18%, var(--history-row-odd-bg)) !important;
+}
+.history-table tbody tr.history-level-1 td.history-col-combined {
+  background: color-mix(in srgb, var(--primary) 15%, var(--history-row-even-bg)) !important;
+}
+
+/* Tabelas do Histórico e Lotes: padrão visual compacto do portal. */
+.history-page .history-table-wrap { margin: 0 12px 12px; border: 1px solid var(--border); border-radius: 8px; }
+.history-page .history-table { font-size: 13px; }
+.history-page .history-table thead th { background: color-mix(in srgb, var(--accent) 8%, var(--card)); font-size: 13px; border-bottom: 1px solid var(--border); }
+.history-page .history-table tbody tr td { background: var(--card); border-top: 0; }
+.history-page .history-table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--secondary) 35%, var(--card)); }
+.history-page .history-table tbody tr:hover td { background: color-mix(in srgb, var(--primary) 5%, var(--card)); }
+.history-page .history-table th, .history-page .history-table td { padding-top: 7px; padding-bottom: 7px; border-left: 0; }
+.history-page .history-table :is(thead, tbody, tfoot) tr :is(th, td).history-col-combined { background: color-mix(in srgb, var(--primary) 5%, var(--card)) !important; color: var(--primary); font-weight: 700; }
+.history-page .history-table tfoot th { background: var(--card); }
+.history-page .history-table .history-expand span:first-child { border: 0; background: transparent; border-radius: 0; }
+.lotes-reference-table th, .lotes-reference-table td, .lotes-reference-table tfoot th { font-size: 13px; padding: 10px 11px; }
+
+.history-page .history-table :is(tbody, tfoot) tr :is(td, th).num { font-weight: 400; }
+
+/* Lotes em Criação — visão Produtores/Galpões v7.52 */
+.lotes-analysis-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; padding:12px 14px 0; border-bottom:1px solid var(--border); }
+.lotes-view-tabs { display:flex; align-items:flex-end; gap:4px; }
+.lotes-view-tab { appearance:none; border:0; border-bottom:3px solid transparent; background:transparent; color:var(--muted-foreground); font:inherit; font-weight:700; padding:11px 18px 10px; cursor:pointer; }
+.lotes-view-tab:hover { color:var(--foreground); }
+.lotes-view-tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+
+.lotes-galpao-controls { display:flex; align-items:flex-end; gap:10px; padding-bottom:8px; }
+.lotes-galpao-controls label { display:grid; gap:4px; color:var(--muted-foreground); font-size:11px; font-weight:700; }
+.lotes-galpao-controls select { min-height:36px; border:1px solid var(--border); border-radius:8px; background:var(--card); color:var(--foreground); padding:0 30px 0 10px; font:inherit; font-size:13px; font-weight:650; }
+.lotes-galpao-fixed-indicator { display:grid; gap:4px; }
+.lotes-galpao-fixed-indicator > span { color:var(--muted-foreground); font-size:11px; font-weight:700; }
+.lotes-galpao-fixed-indicator > strong { min-height:36px; display:flex; align-items:center; padding:0 11px; border:1px solid var(--border); border-radius:8px; background:color-mix(in srgb, var(--primary) 5%, var(--card)); color:var(--primary); font-size:13px; }
+
+/* A aba Produtores mantém até aproximadamente 15 linhas visíveis e rola internamente. */
+#produtoresView .lotes-reference-table-wrap { max-height:665px; overflow:auto; overscroll-behavior:contain; }
+#produtoresView .lotes-reference-table thead th { position:sticky; top:0; z-index:3; }
+#produtoresView .lotes-reference-table tfoot th { position:sticky; bottom:0; z-index:3; background:var(--card); box-shadow:0 -1px 0 var(--border); }
+.lotes-expand-producer { display:inline-flex; align-items:center; gap:8px; border:0; background:transparent; color:inherit; font:inherit; padding:0; cursor:pointer; text-align:left; }
+.lotes-expand-producer > span { display:inline-grid; place-items:center; width:22px; height:22px; border:1px solid var(--border); border-radius:6px; color:var(--primary); background:var(--card); font-size:16px; line-height:1; font-weight:800; flex:0 0 auto; }
+.lotes-producer-row:hover td { background:color-mix(in srgb, var(--primary) 5%, var(--card)); }
+.lotes-galpao-child td { background:color-mix(in srgb, var(--secondary) 42%, var(--card)) !important; color:var(--muted-foreground); }
+.lotes-galpao-child-name { padding-left:30px; color:var(--foreground); font-weight:700; }
+
+/* Gráfico e ranking ocupam exatamente metade da largura e a mesma altura. */
+.lotes-galpao-dashboard { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; gap:14px; padding:14px; }
+.lotes-galpao-chart-card,.lotes-galpao-list-card { min-width:0; height:520px; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:10px; background:var(--card); overflow:hidden; }
+.lotes-galpao-section-head { flex:0 0 auto; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:14px 16px 9px; border-bottom:1px solid color-mix(in srgb, var(--border) 75%, transparent); }
+.lotes-galpao-section-head h3 { margin:0 0 3px; color:var(--primary); font-size:15px; }
+.lotes-galpao-section-head p { margin:0; color:var(--muted-foreground); font-size:12px; }
+.lotes-galpao-ranking-chart { flex:1 1 auto; min-height:0; width:100%; height:auto; }
+.lotes-galpao-ranking-list { flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; padding:0 10px 10px; scrollbar-gutter:stable; }
+.lotes-galpao-ranking-list::-webkit-scrollbar { width:8px; }
+.lotes-galpao-ranking-list::-webkit-scrollbar-thumb { background:color-mix(in srgb, var(--muted-foreground) 34%, transparent); border-radius:99px; }
+
+.lotes-galpao-rank-row { width:100%; display:grid; grid-template-columns:36px minmax(150px,1.35fr) 82px 96px 96px minmax(132px,.75fr); align-items:center; gap:8px; border:0; border-bottom:1px solid var(--border); background:var(--card); color:var(--foreground); padding:10px 8px; text-align:left; cursor:pointer; font:inherit; touch-action:manipulation; }
+.lotes-galpao-rank-row:hover,.lotes-galpao-rank-row:focus-visible { background:color-mix(in srgb, var(--primary) 5%, var(--card)); outline:none; }
+.lotes-galpao-rank-row strong { display:block; font-size:13px; }
+.lotes-galpao-rank-row small { display:block; margin-top:2px; color:var(--muted-foreground); font-size:10px; line-height:1.2; }
+.lotes-galpao-rank-pos { display:grid; place-items:center; width:30px; height:30px; border-radius:7px; background:color-mix(in srgb, var(--accent) 12%, var(--card)); font-weight:800; }
+.lotes-galpao-rank-name { min-width:0; }
+.lotes-galpao-rank-name strong { font-size:14px; }
+.lotes-galpao-rank-name small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lotes-galpao-rank-metric { text-align:right; }
+.lotes-galpao-rank-highlight { text-align:right; border-radius:7px; padding:6px 7px; background:color-mix(in srgb, var(--primary) 8%, var(--card)); color:var(--primary); }
+.lotes-galpao-rank-highlight small { color:var(--primary); opacity:.78; }
+.lotes-galpao-detail-cta { justify-self:stretch; min-height:38px; display:grid; grid-template-columns:1fr auto; grid-template-rows:auto auto; align-items:center; column-gap:6px; padding:5px 8px; border:1px solid color-mix(in srgb, var(--primary) 25%, var(--border)); border-radius:8px; background:color-mix(in srgb, var(--primary) 5%, var(--card)); color:var(--primary); text-align:center; transition:background .18s ease,border-color .18s ease,transform .18s ease; }
+.lotes-galpao-detail-cta > span { grid-column:1; grid-row:1; font-size:11px; font-weight:800; line-height:1.1; }
+.lotes-galpao-detail-cta small { grid-column:1; grid-row:2; margin:1px 0 0; color:var(--muted-foreground); font-size:8px; font-weight:650; line-height:1.1; }
+.lotes-galpao-detail-cta b { grid-column:2; grid-row:1 / span 2; font-size:18px; line-height:1; }
+.lotes-galpao-rank-row:hover .lotes-galpao-detail-cta,.lotes-galpao-rank-row:focus-visible .lotes-galpao-detail-cta { background:color-mix(in srgb, var(--primary) 10%, var(--card)); border-color:color-mix(in srgb, var(--primary) 45%, var(--border)); transform:translateX(1px); }
+.lotes-galpao-empty { padding:30px 16px; color:var(--muted-foreground); text-align:center; }
+
+body.lotes-drawer-open { overflow:hidden; }
+.lotes-galpao-drawer { position:fixed; inset:0; z-index:1200; display:block; }
+.lotes-galpao-drawer-backdrop { position:absolute; inset:0; background:color-mix(in srgb, var(--foreground) 28%, transparent); }
+.lotes-galpao-drawer-panel { position:absolute; top:0; right:0; width:min(620px,92vw); height:100%; display:flex; flex-direction:column; background:var(--background); border-left:1px solid var(--border); box-shadow:-14px 0 40px color-mix(in srgb, var(--foreground) 16%, transparent); }
+.lotes-galpao-drawer-handle { display:none; }
+.lotes-galpao-drawer-header { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; padding:20px 20px 14px; border-bottom:1px solid var(--border); background:var(--card); }
+.lotes-galpao-drawer-header h2 { margin:3px 0 2px; color:var(--primary); font-size:24px; }
+.lotes-galpao-drawer-header p { margin:0; color:var(--muted-foreground); }
+.lotes-galpao-drawer-body { overflow:auto; overscroll-behavior:contain; padding:16px 18px 24px; }
+.lotes-galpao-summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); gap:10px; margin-bottom:14px; }
+.lotes-galpao-summary > div { border:1px solid var(--border); border-radius:9px; background:var(--card); padding:12px; }
+.lotes-galpao-summary small { display:block; color:var(--muted-foreground); font-size:11px; margin-bottom:4px; }
+.lotes-galpao-summary strong { display:block; font-size:14px; }
+.lotes-galpao-detail-section { margin-top:14px; border:1px solid var(--border); border-radius:10px; background:var(--card); overflow:hidden; }
+.lotes-galpao-detail-section h3 { margin:0; padding:12px 14px; color:var(--primary); font-size:14px; border-bottom:1px solid var(--border); }
+.lotes-galpao-detail-table-wrap { overflow-x:hidden; }
+.lotes-galpao-detail-table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:12px; }
+.lotes-galpao-detail-table th,.lotes-galpao-detail-table td { padding:9px 10px; border-bottom:1px solid var(--border); white-space:nowrap; }
+.lotes-galpao-detail-table th { background:color-mix(in srgb, var(--accent) 8%, var(--card)); text-align:left; }
+.lotes-galpao-detail-table .num { text-align:right; }
+.lotes-mortality-cell { color:var(--primary); font-weight:800; background:color-mix(in srgb, var(--primary) 7%, var(--card)); }
+.lotes-galpao-detail-chart { width:100%; height:300px; }
+
+@media (max-width: 1100px) {
+  .lotes-galpao-rank-row { grid-template-columns:34px minmax(120px,1.2fr) 76px 88px 88px 112px; gap:6px; }
+  .lotes-galpao-detail-cta small { font-size:8px; }
+}
+
+@media (max-width: 980px) {
+  .lotes-galpao-dashboard { grid-template-columns:1fr; }
+  .lotes-galpao-chart-card,.lotes-galpao-list-card { height:440px; }
+}
+
+@media (max-width: 768px) {
+  .lotes-analysis-head { align-items:stretch; flex-direction:column; gap:8px; padding:8px 10px 0; }
+  .lotes-view-tabs { width:100%; }
+  .lotes-view-tab { flex:1; min-height:44px; padding:10px 8px; }
+  .lotes-galpao-controls { width:100%; justify-content:space-between; align-items:end; padding:0 0 9px; }
+  .lotes-galpao-fixed-indicator { flex:1; }
+  .lotes-galpao-fixed-indicator > strong { min-height:42px; }
+  .lotes-galpao-controls label { flex:1; }
+  .lotes-galpao-controls select { width:100%; min-height:42px; }
+  .lotes-galpao-dashboard { padding:10px; gap:10px; }
+  .lotes-galpao-chart-card,.lotes-galpao-list-card { height:410px; }
+  .lotes-galpao-ranking-list { padding:0 7px 8px; scrollbar-gutter:auto; }
+  .lotes-galpao-rank-row { grid-template-columns:32px minmax(0,1fr) auto; grid-template-areas:"pos name mortality" "pos aves peso" "pos cta cta"; gap:6px 8px; padding:10px 5px; }
+  .lotes-galpao-rank-pos { grid-area:pos; align-self:start; margin-top:2px; }
+  .lotes-galpao-rank-name { grid-area:name; }
+  .lotes-galpao-rank-highlight { grid-area:mortality; min-width:74px; }
+  .lotes-galpao-rank-metric:nth-of-type(3) { grid-area:aves; text-align:left; }
+  .lotes-galpao-rank-metric:nth-of-type(4) { grid-area:peso; text-align:right; }
+  .lotes-galpao-detail-cta { grid-area:cta; min-height:32px; justify-self:stretch; }
+  .lotes-galpao-detail-cta > span { font-size:11px; }
+  .lotes-galpao-detail-cta small { font-size:8px; }
+  .lotes-galpao-section-head { padding:12px 12px 8px; }
+  .lotes-galpao-section-head p { font-size:11px; }
+
+  .lotes-galpao-drawer-panel { top:auto; bottom:0; width:100%; height:min(92vh,900px); border-left:0; border-top:1px solid var(--border); border-radius:18px 18px 0 0; }
+  .lotes-galpao-drawer-handle { display:block; width:42px; height:4px; border-radius:99px; background:var(--border); margin:8px auto 0; }
+  .lotes-galpao-drawer-header { padding:10px 14px 12px; }
+  .lotes-galpao-drawer-header h2 { font-size:20px; }
+  .lotes-galpao-drawer-body { padding:12px 10px 18px; }
+  .lotes-galpao-summary { grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+  .lotes-galpao-summary > div { padding:9px 8px; min-width:0; }
+  .lotes-galpao-summary strong { font-size:12px; overflow-wrap:anywhere; }
+  .lotes-galpao-detail-table { font-size:11px; }
+  .lotes-galpao-detail-table th,.lotes-galpao-detail-table td { padding:8px 6px; }
+  .lotes-galpao-detail-chart { height:245px; }
+  .lotes-galpao-child-name { padding-left:14px; }
+
+  #produtoresView .lotes-reference-table-wrap { max-height:620px; }
+}
+
+@media (max-width: 430px) {
+  .lotes-galpao-controls { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+  .lotes-galpao-chart-card,.lotes-galpao-list-card { height:390px; }
+  .lotes-galpao-section-head h3 { font-size:14px; }
+  .lotes-galpao-rank-row { grid-template-columns:30px minmax(0,1fr) auto; }
+  .lotes-galpao-rank-row strong { font-size:12px; }
+  .lotes-galpao-rank-name strong { font-size:13px; }
+  .lotes-galpao-rank-highlight { min-width:70px; padding:5px 6px; }
+  .lotes-galpao-summary { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .lotes-galpao-detail-chart { height:225px; }
 }

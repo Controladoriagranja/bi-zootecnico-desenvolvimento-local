@@ -6,7 +6,7 @@
     <link rel="icon" href="assets/img/favicon-granja.png">
     <title>Diferença de Aves Abatidas - BI Zootécnico</title>
     <script>(()=>{const saved=localStorage.getItem('bi-zootecnico-theme');if(saved)document.documentElement.dataset.theme=saved;})();</script>
-    <link href="assets/css/app.css?v=7.33" rel="stylesheet">
+    <link href="assets/css/app.css?v=7.34" rel="stylesheet">
     <link href="assets/vendor/geist/index.css" rel="stylesheet">
 </head>
 <body data-page="diferenca-abate" class="abate-page">
@@ -112,6 +112,7 @@
                         <th>Unidade / Destino</th>
                         <th class="num">Qtde Programada</th>
                         <th class="num">Qtde Real</th>
+                        <th class="num">Dif %</th>
                         <th class="num abate-diff-heading">Dif Qtde RxP</th>
                         <th class="num">Registros c/ Dif.</th>
                         <th class="action">Ação</th>
@@ -141,6 +142,7 @@
             <div><span>Programada</span><strong id="modalProgramada">—</strong></div>
             <div><span>Real</span><strong id="modalReal">—</strong></div>
             <div><span>Dif Qtde RxP</span><strong id="modalDiferenca">—</strong></div>
+            <div><span>Dif %</span><strong id="modalDifPercent">—</strong></div>
         </div>
 
         <div class="abate-table-wrap abate-modal-table-wrap">
@@ -157,6 +159,7 @@
                         <th>Modelo Aviário</th>
                         <th class="num">Qtde Programada</th>
                         <th class="num">Qtde Real</th>
+                        <th class="num">Dif %</th>
                         <th class="num abate-diff-heading">Dif Qtde RxP</th>
                     </tr>
                 </thead>
@@ -182,7 +185,7 @@
 <script src="data/rxp_local.js?v=7.25"></script>
 <script src="assets/js/api.js?v=7.25"></script>
 <script src="assets/js/local-parquet.js?v=7.31"></script>
-<script src="assets/js/rxp.js?v=7.32"></script>
+<script src="assets/js/rxp.js?v=7.46"></script>
 <script src="assets/js/sidebar.js?v=7.27"></script>
 </body>
 </html>

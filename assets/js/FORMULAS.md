@@ -389,3 +389,12 @@ Os itens definem nomes e colunas. Em metrics.js, as expressões finais são gera
 ## Filtro de idade atual (atualização)
 
 Em lotes.js, AGE_RANGES e matchesAgeRange selecionam faixas inclusivas 0–7, 8–14, 15–21, 22–28, 29–35, 36–42 e 43–45. Seleções múltiplas unem as faixas sem duplicação. Todos os filtros de dimensões são combinados por interseção. Cards, gráficos e tabela recebem as mesmas linhas filtradas. Os cálculos usam as colunas semanais até 42 dias, somente quando o lote atingiu a semana; não existe coluna de 45 dias.
+
+
+## RxP — Dif %
+
+**Fórmula:** `Dif % = Σ(Dif Qtde RxP) / Σ(Qtde Programada) × 100`
+
+- Na visão consolidada, usa as somas do contexto/Unidade para manter a taxa ponderada.
+- Em **Ver produtores**, cada linha usa `Dif Qtde RxP / Qtde Programada × 100`.
+- Quando Qtde Programada é zero, a taxa é exibida como `—`.

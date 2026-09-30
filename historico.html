@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="assets/img/favicon-granja.png">
+    <title>Histórico de Lotes - BI Zootécnico</title>
+    <script>(()=>{const saved=localStorage.getItem('bi-zootecnico-theme');if(saved)document.documentElement.dataset.theme=saved;})();</script>
+    <link href="assets/css/app.css?v=7.51" rel="stylesheet">
+    <link href="assets/vendor/geist/index.css" rel="stylesheet">
+</head>
+<body data-page="historico" class="history-page">
+<div class="app-shell history-shell">
+    <header class="lotes-compact-header history-header">
+        <div>
+            <div class="eyebrow">Dashboard Zootécnico</div>
+            <h1>Histórico de Lotes</h1>
+        </div>
+        <div class="card-actions">
+            <button aria-label="Alternar tema" class="icon-button" data-theme-toggle title="Alternar tema" type="button"><span data-theme-icon>☾</span></button>
+        </div>
+    </header>
+
+    <section class="card filter-card history-filter-card" aria-labelledby="historyFiltersTitle">
+        <div class="filter-card-top">
+            <div><h2 id="historyFiltersTitle">Filtros</h2><p>Consulte lotes abertos e expanda a semana para ver produtores e galpões.</p></div>
+            <button class="button button-ghost-danger" id="limparFiltrosHistorico" type="button">Limpar filtros</button>
+        </div>
+        <div class="history-filters" id="historyFilters"></div>
+    </section>
+
+    <div class="alert alert-error hidden" id="mensagemErroHistorico"></div>
+    <section class="history-kpis" id="historyKpis" aria-live="polite"></section>
+    <section class="card history-table-card">
+        <div class="history-table-heading">
+            <div><h2>Histórico por semana</h2><p>Abra uma semana para consultar produtores e galpões.</p></div>
+            <div class="history-table-heading-actions">
+                <button class="mini-button" type="button" data-historico-formula="tabela" aria-label="Ver fórmula da tabela"><span class="formula-fx">ƒx</span></button>
+                <div class="history-view-filter" role="radiogroup" aria-label="Visualização da tabela">
+                    <button type="button" class="history-view-button active" data-history-view="mortality" role="radio" aria-checked="true">Mortalidade</button>
+                    <button type="button" class="history-view-button" data-history-view="weight" role="radio" aria-checked="false">Peso</button>
+                </div>
+                <div class="history-year-filter" role="radiogroup" aria-label="Filtrar por ano"><button type="button" class="history-year-button" data-history-year="2023" role="radio" aria-checked="false">2023</button><button type="button" class="history-year-button" data-history-year="2024" role="radio" aria-checked="false">2024</button><button type="button" class="history-year-button" data-history-year="2025" role="radio" aria-checked="false">2025</button><button type="button" class="history-year-button active" data-history-year="2026" role="radio" aria-checked="true">2026</button></div>
+            </div>
+        </div>
+        <div class="history-table-wrap">
+            <table class="history-table" data-view="mortality" aria-label="Histórico de lotes agrupado por semana, produtor e galpão">
+                <thead id="historyTableHead"></thead>
+                <tbody id="historyTableBody"></tbody>
+                <tfoot id="historyTableFoot"></tfoot>
+            </table>
+        </div>
+    </section>
+</div>
+<div class="dialog-layer hidden" id="formulaModalHistorico">
+    <div class="dialog-backdrop" id="formulaBackdropHistorico"></div>
+    <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="formulaTituloHistorico" tabindex="-1">
+        <header class="dialog-header"><div><div class="eyebrow">Fórmula do indicador</div><h2 id="formulaTituloHistorico"></h2></div><button class="icon-button" id="formulaFecharHistorico" type="button" aria-label="Fechar fórmula">×</button></header>
+        <div class="dialog-body"><div class="info-block"><span>Fórmula</span><div class="code-inline" id="formulaExpressaoHistorico"></div></div><div class="info-block"><span>Descrição</span><p id="formulaDescricaoHistorico"></p></div><div id="formulaExplicacaoHistorico"></div></div>
+    </section>
+</div>
+
+<script src="assets/js/formula-ui.js?v=7.18"></script>
+<script src="assets/js/theme.js?v=7.6"></script>
+<script src="data/lotes_abertos_local.js?v=7.41"></script>
+<script src="assets/js/historico-calculos.js?v=7.49"></script>
+<script src="assets/js/filters.js?v=7.29"></script>
+<script src="assets/js/historico.js?v=7.49"></script>
+<script src="assets/js/sidebar.js?v=7.45"></script>
+</body>
+</html>
