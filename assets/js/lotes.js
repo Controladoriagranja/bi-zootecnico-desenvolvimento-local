@@ -4,15 +4,6 @@
  */
 (() => {
   const WEEKS = [7, 14, 21, 28, 35, 42];
-  const AGE_RANGES = [
-    { value: "7", min: 0, max: 7 },
-    { value: "14", min: 8, max: 14 },
-    { value: "21", min: 15, max: 21 },
-    { value: "28", min: 22, max: 28 },
-    { value: "35", min: 29, max: 35 },
-    { value: "42", min: 36, max: 42 },
-    { value: "45", min: 43, max: 45 },
-  ];
   const state = {
     raw: [],
     rows: [],
@@ -163,7 +154,7 @@
    *     se idade >= semana: total += mortalityAtWeek(lote, semana)
    */
   function mortalitySelected(row) {
-    return WEEKS.reduce(
+    return selectedWeeks().reduce(
       (total, week) => total + (week <= row.idade ? mortalityAtWeek(row, week) : 0),
       0,
     );
@@ -202,7 +193,7 @@
     // 2) soma essas médias;
     // 3) divide pela quantidade de semanas com média válida.
     // `rows` já contém todos os filtros ativos da tela.
-    const weeklyMeans = WEEKS
+    const weeklyMeans = selectedWeeks()
       .map((week) => weeklyWeightMean(rows, week))
       .filter((value) => value !== null);
     return weeklyMeans.length
@@ -224,14 +215,25 @@
     return state.filters ? state.filters.values() : {};
   }
 
+  function hasPeriodSelection() {
+    const selected = selectedFilters().periodo_dias || [];
+    return selected.length > 0 && selected.length < WEEKS.length;
+  }
+
+  function selectedWeeks() {
+    if (!hasPeriodSelection()) return WEEKS;
+    const selected = selectedFilters().periodo_dias.map(Number);
+    return WEEKS.filter(week => selected.includes(week));
+  }
+
   function includesSelected(selected, value) {
     return !selected?.length || selected.includes(String(value));
   }
 
-  // Faixas inclusivas e sem sobreposição; várias seleções formam uma união.
+  // Cada semana usa lotes que já atingiram a idade; todos mantém a janela completa.
   function matchesAgeRange(age, selected) {
-    return !selected?.length || AGE_RANGES.some(range =>
-      selected.includes(range.value) && age >= range.min && age <= range.max);
+    return !selected?.length || selected.length === WEEKS.length ||
+      selected.some(week => WEEKS.includes(Number(week)) && age >= Number(week));
   }
 
   function matchesLote(row, f, exclude = null) {
@@ -247,9 +249,9 @@
   function lotesOptions(filters) {
     return Object.fromEntries(FILTER_FIELDS.map(({ apiKey }) => {
       const values = opcoesDisponiveis(apiKey, state.raw, filters, matchesLote, row =>
-        apiKey === "periodo_dias" ? AGE_RANGES.find(r => row.idade >= r.min && row.idade <= r.max)?.value : row[apiKey]);
-      return [apiKey, apiKey === "periodo_dias" ? AGE_RANGES.filter(r => values.includes(r.value))
-        .map(r => ({ valor: r.value, nome: `${r.min}–${r.max} dias` })) : values];
+        apiKey === "periodo_dias" ? row.idade : row[apiKey]);
+      return [apiKey, apiKey === "periodo_dias" ? WEEKS.filter(week => values.some(age => Number(age) >= week))
+        .map(week => ({ valor: String(week), nome: `${week} dias` })) : values];
     }));
   }
 
@@ -346,7 +348,7 @@
    *   peso = weeklyWeightMean(linhas, semana)
    */
   function weeklyData(rows) {
-    return WEEKS.map((week) => {
+    return selectedWeeks().map((week) => {
       // Cada ponto usa diretamente a coluna da idade correspondente:
       // Peso Med.-07, Peso Med.-14 ... e Mortalidade = Mortes + Descartes da mesma semana.
       const eligible = rows.filter((row) => row.idade >= week);
@@ -443,6 +445,11 @@
     const accent = css("--accent");
     const muted = css("--muted-foreground");
     const base = baseChartOption();
+    const readableLabel = {
+      color: css("--foreground"), backgroundColor: css("--card"),
+      fontSize: 12, fontWeight: 600, padding: [3, 4], borderRadius: 4,
+      distance: 12,
+    };
 
     const mortality = getChart("chartMortalidade");
     mortality.setOption(
@@ -474,8 +481,12 @@
             label: {
               show: true,
               position: "insideTop",
+              distance: 6,
               color: "#fff",
-              fontSize: 10,
+              backgroundColor: "rgba(0,0,0,0.55)",
+              padding: [3, 3],
+              borderRadius: 3,
+              fontSize: 11,
               fontWeight: 700,
               formatter: (p) => fmt(p.value),
             },
@@ -498,11 +509,9 @@
             label: {
               show: true,
               position: "top",
-              distance: 8,
-              color: primary,
+              ...readableLabel,
+              color: "#211b1d",
               backgroundColor: accent,
-              borderRadius: 5,
-              padding: [3, 5],
               formatter: (p) => (p.value == null ? "" : `${fmt(p.value, 2)}%`),
             },
             labelLayout: { hideOverlap: true, moveOverlap: "shiftY" },
@@ -533,9 +542,7 @@
             label: {
               show: true,
               position: "top",
-              distance: 7,
-              color: muted,
-              fontSize: 10,
+              ...readableLabel,
               formatter: (p) => (p.value == null ? "" : fmt(p.value, 2)),
             },
             labelLayout: { hideOverlap: true },
@@ -554,7 +561,7 @@
      *   pontos semanais = pesos de weeklyData
      */
     const growthPoints = [
-      ...[{
+      ...(!hasPeriodSelection() ? [{
         week: 0,
         label: "0",
         value: (() => {
@@ -563,7 +570,7 @@
             .filter((v) => v !== null);
           return ps.length ? ps.reduce((a, b) => a + b, 0) / ps.length : null;
         })(),
-      }],
+      }] : []),
       ...weekly.map((x) => ({
         week: x.week,
         label: String(x.week),
@@ -612,9 +619,7 @@
             label: {
               show: true,
               position: "top",
-              distance: 8,
-              color: muted,
-              fontWeight: 650,
+              ...readableLabel,
               formatter: (p) => fmt(p.value, 2),
             },
             labelLayout: { hideOverlap: true, moveOverlap: "shiftY" },
@@ -754,7 +759,7 @@
     document.addEventListener("click", event => {
       const button = event.target.closest("[data-lotes-formula]");
       if (!button) return;
-      const metric = buildLotesFormulas().find(item => item.id === button.dataset.lotesFormula);
+      const metric = buildLotesFormulas(selectedWeeks(), hasPeriodSelection()).find(item => item.id === button.dataset.lotesFormula);
       if (!metric) return;
       opener = button;
       $("formulaTituloLotes").textContent = metric.nome;

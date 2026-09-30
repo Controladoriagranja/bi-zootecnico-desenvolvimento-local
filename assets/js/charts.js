@@ -46,7 +46,7 @@ window.ZooCharts = (() => {
             };
         }
         return {
-            grid: { left: narrow ? 46 : 58, right: narrow ? 16 : 22, top: 52, bottom: 42 },
+            grid: { left: narrow ? 46 : 58, right: narrow ? 16 : 22, top: 110, bottom: 42 },
             xAxis: { axisLabel: {
                 formatter: value => narrow ? String(value).slice(0, 3) : value,
                 hideOverlap: true
@@ -71,6 +71,19 @@ window.ZooCharts = (() => {
         if (state?.kind) {
             // Merge layout only: preserve dataZoom, legend selection and series.
             chart.setOption(responsiveOptions(chart, state.kind));
+            if (state.kind === "evolution") {
+                const years = chart.getOption().series.map(s => Number(s.name)).sort((a, b) => b - a);
+                const narrow = chart.getWidth() < 700;
+                const keep = new Set(years);
+                chart.setOption({ series: chart.getOption().series.map(s => ({
+                    name: s.name, label: { show: keep.has(Number(s.name)) },
+                    labelLayout: { hideOverlap: Number(s.name) !== years[0] }
+                })) });
+                if (state.narrow !== narrow) {
+                    chart.setOption({ dataZoom: [{ start: 0, end: narrow ? 25 : 100 }] });
+                    state.narrow = narrow;
+                }
+            }
         }
     }
 
@@ -162,7 +175,7 @@ window.ZooCharts = (() => {
                     const item = params[0];
 
                     const value = Number(item.value).toLocaleString("pt-BR", {
-                        maximumFractionDigits: 3
+                        minimumFractionDigits: decimals, maximumFractionDigits: decimals
                     });
                     // Canvas tooltip avoids HTML measurement expanding mobile viewports.
                     return wrapTooltip(item.name, chart.getDom().clientWidth)
@@ -229,12 +242,24 @@ window.ZooCharts = (() => {
         const c = common();
         instances.set(chart, { kind: "evolution" });
 
+        const formatEvolutionValue = value => value === null || value === undefined ? "—" :
+            Number(value).toLocaleString("pt-BR", {
+                minimumFractionDigits: decimals, maximumFractionDigits: decimals
+            }) + (unit === "%" ? "%" : "");
+        const newestYear = Math.max(...response.series.map(s => Number(s.ano)));
         const series = response.series.map(
             (serie, index) => ({
                 name: String(serie.ano),
                 type: "bar",
                 data: serie.valores,
                 ...valueLabels(chart, "top", decimals, unit),
+                label: { ...valueLabels(chart, "top", decimals, unit).label,
+                    rotate: 90, align: "left", verticalAlign: "middle", distance: 10,
+                    fontSize: 12, fontWeight: 700, color: c.text,
+                    formatter: p => p.value == null ? "" : formatEvolutionValue(p.value),
+                    backgroundColor: c.card, padding: [3, 4], borderRadius: 3 },
+                labelLayout: { hideOverlap: Number(serie.ano) !== newestYear },
+                barGap: "35%",
                 barMaxWidth: 22,
                 itemStyle: {
                     borderRadius: [6, 6, 0, 0],
@@ -265,6 +290,7 @@ window.ZooCharts = (() => {
                 trigger: "axis",
                 confine: true,
                 renderMode: "richText",
+                valueFormatter: formatEvolutionValue,
                 backgroundColor: c.card,
                 borderColor: c.border,
                 textStyle: {

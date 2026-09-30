@@ -6,7 +6,7 @@
   const WEEKS = [7, 14, 21, 28, 35, 42];
   /**
    * FÓRMULA: Catálogo de fórmulas de Lotes
-   * Gera textos dos cinco cards e três gráficos para os lotes das faixas de idade selecionadas. Não calcula os dados;
+   * Gera textos dos cinco cards e três gráficos para os lotes que atingiram as semanas selecionadas. Não calcula os dados;
    * aponta para as funções documentadas de lotes.js.
    * Passo a passo (pseudocódigo):
    *   retornar descrições de contagem, soma, M+D, percentual e médias
@@ -18,8 +18,8 @@
     const weightColumns = weeks.map(week => "Peso Med.-" + suffix(week));
     const terms = weeks.map(week => `[Qtde Mort Sem-${suffix(week)}] + [Qtde Desc Sem-${suffix(week)}]`);
     const period = "Σ por lote (" + terms.join(" + ") + ")";
-    const context = "Considera todos os filtros ativos da tela: Faixa de idade atual (0–7, 8–14, 15–21, 22–28, 29–35, 36–42 e 43–45 dias), Tipo de Granja, Produtor, Modelo, Galpão, Técnico e Mist Linha. A base usa somente lotes abertos com Data Recepcao nos últimos 45 dias; cada Codigo Granja + Num Lote + Galp + Data Recepcao aparece uma vez, na versão mais recente por Periodo_Arquivo_Fim.";
-    const eligibility = "Para cada semana, use somente lotes que já atingiram essa idade. O filtro seleciona a idade atual dos lotes, não as colunas semanais. Várias faixas formam uma união sem duplicar lotes.";
+    const context = "Considera todos os filtros ativos da tela: Semana de avaliação (7, 14, 21, 28, 35 e 42 dias), Tipo de Granja, Produtor, Modelo, Galpão, Técnico e Mist Linha. A base usa somente lotes abertos com Data Recepcao nos últimos 45 dias; cada Codigo Granja + Num Lote + Galp + Data Recepcao aparece uma vez, na versão mais recente por Periodo_Arquivo_Fim.";
+    const eligibility = "Para cada semana, use somente lotes que já atingiram essa idade. Inclui também lotes mais velhos, usando seus registros na semana escolhida. Somente as colunas selecionadas são calculadas, sem acumular semanas anteriores. Várias semanas formam uma união sem duplicar lotes.";
     const weeklyMeanLabels = weeks.map(week => `Média([Peso Med.-${suffix(week)}])`);
     const generalWeightFormula = weeklyMeanLabels.length
       ? `(${weeklyMeanLabels.join(" + ")}) / quantidade de médias semanais válidas`
@@ -32,7 +32,7 @@
         descricao: context, passos: ["Mantenha a versão mais recente de cada lote/galpão.", "Aplique a janela de 45 dias e os filtros selecionados.", eligibility, "Conte os lotes resultantes."] },
       { id: "aves_alojadas", nome: "Aves Alojadas", formula_exibicao: "Σ([Aves Inicia])",
         colunas: ["Aves Inicia"], descricao: context,
-        passos: ["Use os mesmos lotes do card Lotes em Criação.", "Some a coluna [Aves Inicia] uma única vez por lote, mesmo ao selecionar várias faixas de idade."] },
+        passos: ["Use os mesmos lotes do card Lotes em Criação.", "Some a coluna [Aves Inicia] uma única vez por lote, mesmo ao selecionar várias semanas."] },
       { id: "mortalidade_qtde", nome: "Mortalidade no Período (Qtde)", formula_exibicao: period,
         colunas: mortalityColumns, descricao: "Mortes + descartes somente das semanas disponíveis: " + weeks.join(", ") + " dias.",
         passos: [eligibility, "Em cada lote, some as colunas de mortes e descartes das semanas disponíveis que o lote já atingiu.", "Some os resultados dos lotes. Campos vazios de mortes/descartes contam como zero."] },
