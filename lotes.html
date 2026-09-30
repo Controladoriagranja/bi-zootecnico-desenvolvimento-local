@@ -6,7 +6,7 @@
     <link rel="icon" href="assets/img/favicon-granja.png">
     <title>Lotes em Criação - BI Zootécnico</title>
     <script>(()=>{const saved=localStorage.getItem('bi-zootecnico-theme');if(saved)document.documentElement.dataset.theme=saved;})();</script>
-    <link href="assets/css/app.css?v=7.29" rel="stylesheet">
+    <link href="assets/css/app.css?v=7.51" rel="stylesheet">
     <link href="assets/vendor/geist/index.css" rel="stylesheet">
 </head>
 <body data-page="lotes" class="lotes-reference-page">
@@ -63,6 +63,18 @@
     </section>
 
     <section class="card lotes-reference-table-card">
+        <div class="lotes-analysis-head">
+            <div class="lotes-view-tabs" role="tablist" aria-label="Visualização da tabela">
+                <button class="lotes-view-tab active" id="tabProdutores" type="button" role="tab" aria-selected="true" data-lotes-view="produtores">Produtores</button>
+                <button class="lotes-view-tab" id="tabGalpoes" type="button" role="tab" aria-selected="false" data-lotes-view="galpoes">Galpões</button>
+            </div>
+            <div class="lotes-galpao-controls hidden" id="galpaoRankingControls">
+                <label>Indicador<select id="galpaoIndicador"><option value="mortalidade">Mortalidade (%)</option><option value="peso">Peso</option></select></label>
+                <label>Ranking<select id="galpaoRanking"><option value="piores">10 piores</option><option value="melhores">10 melhores</option></select></label>
+            </div>
+        </div>
+
+        <div id="produtoresView">
         <div class="lotes-table-wrap lotes-reference-table-wrap">
             <table class="lotes-table lotes-reference-table">
                 <thead><tr>
@@ -78,7 +90,37 @@
                 <tfoot id="tabelaLotesFoot"></tfoot>
             </table>
         </div>
+        </div>
+
+        <div class="hidden" id="galpoesView">
+            <div class="lotes-galpao-dashboard">
+                <article class="lotes-galpao-chart-card">
+                    <div class="lotes-galpao-section-head"><div><h3 id="galpaoRankingTitulo">Top 10 galpões com pior resultado</h3><p id="galpaoRankingSubtitulo">Mortalidade percentual por galpão</p></div></div>
+                    <div class="lotes-galpao-ranking-chart" id="chartGalpoesRanking"></div>
+                </article>
+                <article class="lotes-galpao-list-card">
+                    <div class="lotes-galpao-section-head"><div><h3>Ranking de Galpões</h3><p>Clique em um galpão para abrir o detalhamento.</p></div></div>
+                    <div class="lotes-galpao-ranking-list" id="galpaoRankingList"></div>
+                </article>
+            </div>
+        </div>
     </section>
+</div>
+
+<div class="lotes-galpao-drawer hidden" id="galpaoDrawer" aria-hidden="true">
+    <div class="lotes-galpao-drawer-backdrop" id="galpaoDrawerBackdrop"></div>
+    <aside class="lotes-galpao-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="galpaoDrawerTitulo">
+        <div class="lotes-galpao-drawer-handle"></div>
+        <header class="lotes-galpao-drawer-header">
+            <div><div class="eyebrow">Detalhe do Galpão</div><h2 id="galpaoDrawerTitulo">Galpão</h2><p id="galpaoDrawerProdutor"></p></div>
+            <button class="icon-button" id="galpaoDrawerFechar" type="button" aria-label="Fechar detalhe">×</button>
+        </header>
+        <div class="lotes-galpao-drawer-body">
+            <div class="lotes-galpao-summary" id="galpaoDrawerResumo"></div>
+            <section class="lotes-galpao-detail-section"><h3>Desempenho por Idade</h3><div class="lotes-galpao-detail-table-wrap"><table class="lotes-galpao-detail-table"><thead><tr><th>Idade</th><th class="num">Peso</th><th class="num">Referência</th><th class="num">Dif.</th><th class="num">Dif. %</th><th class="num">Mort. %</th></tr></thead><tbody id="galpaoDrawerTabela"></tbody></table></div></section>
+            <section class="lotes-galpao-detail-section"><h3>Evolução de Peso</h3><div class="lotes-galpao-detail-chart" id="chartGalpaoDetalhe"></div></section>
+        </div>
+    </aside>
 </div>
 
 <div class="dialog-layer hidden" id="formulaModalLotes">
@@ -97,7 +139,7 @@
 <script src="assets/js/filters.js?v=7.29"></script>
 <script src="data/base_dinamica_local.js?v=7.29"></script>
 <script src="data/lotes_abertos_local.js?v=7.15"></script>
-<script src="assets/js/lotes.js?v=7.40"></script>
+<script src="assets/js/lotes.js?v=7.51"></script>
 <script src="assets/js/sidebar.js?v=7.27"></script>
 </body>
 </html>

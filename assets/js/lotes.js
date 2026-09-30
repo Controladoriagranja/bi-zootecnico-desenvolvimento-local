@@ -12,6 +12,12 @@
     filters: null,
     sort: { key: "aves", dir: "desc" },
     resizeObserver: null,
+    tableView: "produtores",
+    expandedGroups: new Set(),
+    galpaoIndicator: "mortalidade",
+    galpaoRanking: "piores",
+    rankingChart: null,
+    detailChart: null,
   };
 
   const $ = (id) => document.getElementById(id);
@@ -630,6 +636,184 @@
     );
   }
 
+
+  function groupKey(group) {
+    return [group.tipo, group.produtor, group.linhagem].join("||");
+  }
+
+  function referenceWeightMean(rows, week) {
+    const column = `STD Peso Med-${String(week).padStart(2, "0")}`;
+    const values = rows
+      .filter((row) => row.idade >= week)
+      .map((row) => num(row.source[column]))
+      .filter((value) => value !== null && value > 0);
+    return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+  }
+
+  function latestComparableWeight(rows) {
+    const maxAge = rows.reduce((max, row) => Math.max(max, row.idade || 0), 0);
+    const weeks = selectedWeeks().filter((week) => week <= maxAge).sort((a, b) => b - a);
+    for (const week of weeks) {
+      const actual = weeklyWeightMean(rows, week);
+      const reference = referenceWeightMean(rows, week);
+      if (actual !== null && reference !== null && reference !== 0) {
+        return { week, actual, reference, diff: actual - reference, diffPct: (actual / reference - 1) * 100 };
+      }
+    }
+    return { week: null, actual: null, reference: null, diff: null, diffPct: null };
+  }
+
+  function aggregateGalpoes(rows) {
+    const groups = new Map();
+    rows.forEach((row) => {
+      const key = [row.produtor, row.galpao].join("||");
+      if (!groups.has(key)) groups.set(key, { produtor: row.produtor, galpao: row.galpao || "—", tipo: row.tipo_granja, linhagem: row.linhagem, rows: [], aves: 0, mortes: 0 });
+      const g = groups.get(key);
+      g.rows.push(row);
+      g.aves += row.aves;
+      g.mortes += mortalitySelected(row);
+    });
+    return [...groups.values()].map((g) => {
+      const weight = latestComparableWeight(g.rows);
+      return {
+        ...g,
+        idade: g.rows.reduce((max, row) => Math.max(max, row.idade || 0), 0),
+        mortalidade: g.aves ? (g.mortes / g.aves) * 100 : null,
+        peso: weight.actual,
+        referencia: weight.reference,
+        difPeso: weight.diff,
+        difPesoPct: weight.diffPct,
+        pesoSemana: weight.week,
+      };
+    });
+  }
+
+  function galpaoEvolution(rows) {
+    return WEEKS.map((week) => {
+      const eligible = rows.filter((row) => row.idade >= week);
+      if (!eligible.length) return null;
+      const peso = weeklyWeightMean(rows, week);
+      const referencia = referenceWeightMean(rows, week);
+      const mortes = eligible.reduce((sum, row) => sum + mortalityAtWeek(row, week), 0);
+      const aves = eligible.reduce((sum, row) => sum + row.aves, 0);
+      return {
+        week,
+        peso,
+        referencia,
+        dif: peso !== null && referencia !== null ? peso - referencia : null,
+        difPct: peso !== null && referencia ? (peso / referencia - 1) * 100 : null,
+        mortalidade: aves ? (mortes / aves) * 100 : null,
+      };
+    }).filter(Boolean);
+  }
+
+  function rankedGalpoes(rows) {
+    const indicator = state.galpaoIndicator;
+    const direction = state.galpaoRanking;
+    const items = aggregateGalpoes(rows).filter((g) => indicator === "mortalidade" ? g.mortalidade !== null : g.difPesoPct !== null);
+    items.sort((a, b) => {
+      const av = indicator === "mortalidade" ? a.mortalidade : a.difPesoPct;
+      const bv = indicator === "mortalidade" ? b.mortalidade : b.difPesoPct;
+      if (indicator === "mortalidade") return direction === "piores" ? bv - av : av - bv;
+      return direction === "piores" ? av - bv : bv - av;
+    });
+    return items.slice(0, 10);
+  }
+
+  function renderGalpaoRanking(rows) {
+    if (state.tableView !== "galpoes") return;
+    const items = rankedGalpoes(rows);
+    const isMort = state.galpaoIndicator === "mortalidade";
+    $("galpaoRankingTitulo").textContent = `Top ${items.length || 10} galpões com ${state.galpaoRanking === "piores" ? "pior" : "melhor"} resultado`;
+    $("galpaoRankingSubtitulo").textContent = isMort ? "Mortalidade percentual por galpão" : "Diferença percentual do peso real contra o STD da mesma idade";
+    $("galpaoRankingList").innerHTML = items.length ? items.map((g, i) => `
+      <button class="lotes-galpao-rank-row" type="button" data-galpao-detail="${esc(g.produtor)}||${esc(g.galpao)}">
+        <span class="lotes-galpao-rank-pos">${i + 1}</span>
+        <span class="lotes-galpao-rank-name"><strong>${esc(g.galpao)}</strong><small>${esc(g.produtor)}</small></span>
+        <span><strong>${fmt(g.idade)}</strong><small>dias</small></span>
+        <span><strong>${fmt(g.aves)}</strong><small>aves</small></span>
+        <span><strong>${fmt(g.mortalidade, 2)}%</strong><small>Mort.</small></span>
+        <span><strong>${fmt(g.peso, 2)}</strong><small>Peso${g.pesoSemana ? ` · ${g.pesoSemana}d` : ""}</small></span>
+        <span class="lotes-galpao-rank-highlight"><strong>${isMort ? `${fmt(g.mortalidade, 2)}%` : `${g.difPesoPct > 0 ? "+" : ""}${fmt(g.difPesoPct, 2)}%`}</strong><small>${isMort ? "Mort. %" : "Dif. %"}</small></span>
+        <span class="lotes-galpao-rank-arrow">›</span>
+      </button>`).join("") : '<div class="lotes-galpao-empty">Nenhum galpão encontrado para os filtros selecionados.</div>';
+
+    if (!window.echarts || !$("chartGalpoesRanking")) return;
+    if (!state.rankingChart) state.rankingChart = echarts.init($("chartGalpoesRanking"));
+    const primary = css("--primary");
+    const foreground = css("--foreground");
+    const muted = css("--muted-foreground");
+    const border = css("--border");
+    const values = items.map((g) => isMort ? g.mortalidade : g.difPesoPct);
+    state.rankingChart.setOption({
+      animationDuration: 350,
+      grid: { left: 118, right: 58, top: 12, bottom: 26 },
+      tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, formatter: (params) => { const p = params[0]; const g = items[p.dataIndex]; return `<strong>${esc(g.galpao)} · ${esc(g.produtor)}</strong><br>${isMort ? "Mortalidade" : "Dif. peso"}: ${fmt(p.value, 2)}%`; } },
+      xAxis: { type: "value", axisLabel: { color: muted, formatter: "{value}%" }, splitLine: { lineStyle: { color: border } } },
+      yAxis: { type: "category", inverse: true, data: items.map((g) => `${g.galpao} · ${g.produtor}`), axisLabel: { color: foreground, width: 104, overflow: "truncate" }, axisTick: { show: false }, axisLine: { show: false } },
+      series: [{ type: "bar", data: values, barMaxWidth: 24, itemStyle: { color: primary, borderRadius: 5 }, label: { show: true, position: "right", color: foreground, formatter: (p) => `${fmt(p.value, 2)}%` } }],
+    }, true);
+    state.rankingChart.off("click");
+    state.rankingChart.on("click", (params) => { const g = items[params.dataIndex]; if (g) openGalpaoDetail(g.produtor, g.galpao); });
+    requestAnimationFrame(() => state.rankingChart?.resize());
+  }
+
+  function renderDetailChart(evolution) {
+    if (!window.echarts || !$("chartGalpaoDetalhe")) return;
+    if (!state.detailChart) state.detailChart = echarts.init($("chartGalpaoDetalhe"));
+    const primary = css("--primary"), accent = css("--accent"), foreground = css("--foreground"), muted = css("--muted-foreground"), border = css("--border");
+    const valid = evolution.filter((x) => x.peso !== null || x.referencia !== null);
+    state.detailChart.setOption({
+      grid: { left: 48, right: 24, top: 34, bottom: 36 },
+      tooltip: { trigger: "axis" },
+      legend: { data: ["Peso do Galpão", "Referência"], textStyle: { color: foreground } },
+      xAxis: { type: "category", data: valid.map((x) => `${x.week}`), axisLabel: { color: muted }, axisLine: { lineStyle: { color: border } } },
+      yAxis: { type: "value", axisLabel: { color: muted }, splitLine: { lineStyle: { color: border } } },
+      series: [
+        { name: "Peso do Galpão", type: "line", data: valid.map((x) => x.peso), smooth: .25, symbolSize: 7, lineStyle: { color: primary, width: 3 }, itemStyle: { color: primary } },
+        { name: "Referência", type: "line", data: valid.map((x) => x.referencia), smooth: .25, symbolSize: 7, lineStyle: { color: accent, width: 3 }, itemStyle: { color: accent } },
+      ],
+    }, true);
+    requestAnimationFrame(() => state.detailChart?.resize());
+  }
+
+  function openGalpaoDetail(produtor, galpao) {
+    const rows = state.rows.filter((row) => row.produtor === produtor && row.galpao === galpao);
+    if (!rows.length) return;
+    const evolution = galpaoEvolution(rows);
+    const sample = rows[0];
+    $("galpaoDrawerTitulo").textContent = `Galpão ${galpao}`;
+    $("galpaoDrawerProdutor").textContent = produtor;
+    $("galpaoDrawerResumo").innerHTML = `
+      <div><small>Idade atual</small><strong>${fmt(rows.reduce((m, r) => Math.max(m, r.idade || 0), 0))} dias</strong></div>
+      <div><small>Linhagem</small><strong>${esc(sample.linhagem || "—")}</strong></div>
+      <div><small>Aves alojadas</small><strong>${fmt(rows.reduce((sum, r) => sum + r.aves, 0))}</strong></div>`;
+    $("galpaoDrawerTabela").innerHTML = evolution.map((x) => `<tr><td>${x.week} dias</td><td class="num">${fmt(x.peso, 2)}</td><td class="num">${fmt(x.referencia, 2)}</td><td class="num">${fmt(x.dif, 2)}</td><td class="num lotes-diff-cell">${x.difPct === null ? "—" : `${x.difPct > 0 ? "+" : ""}${fmt(x.difPct, 2)}%`}</td><td class="num">${x.mortalidade === null ? "—" : `${fmt(x.mortalidade, 2)}%`}</td></tr>`).join("");
+    $("galpaoDrawer").classList.remove("hidden");
+    $("galpaoDrawer").setAttribute("aria-hidden", "false");
+    document.body.classList.add("lotes-drawer-open");
+    renderDetailChart(evolution);
+  }
+
+  function closeGalpaoDetail() {
+    $("galpaoDrawer")?.classList.add("hidden");
+    $("galpaoDrawer")?.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("lotes-drawer-open");
+  }
+
+  function setTableView(view) {
+    state.tableView = view;
+    $("produtoresView").classList.toggle("hidden", view !== "produtores");
+    $("galpoesView").classList.toggle("hidden", view !== "galpoes");
+    $("galpaoRankingControls").classList.toggle("hidden", view !== "galpoes");
+    document.querySelectorAll("[data-lotes-view]").forEach((button) => {
+      const active = button.dataset.lotesView === view;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-selected", String(active));
+    });
+    if (view === "galpoes") renderGalpaoRanking(state.rows);
+  }
+
   /**
    * FÓRMULA: Agrupamento da tabela
    * Agrupa por tipo_granja + produtor + linhagem. Soma aves e M+D; recalcula percentual e
@@ -718,16 +902,18 @@
   function renderTable(rows) {
     const groups = sortedGroups(aggregateTable(rows));
     $("tabelaLotesBody").innerHTML = groups.length
-      ? groups
-          .map(
-            (g) =>
-              `<tr><td>${esc(g.tipo)}</td><td>${esc(g.produtor)}</td><td>${esc(g.linhagem)}</td><td class="num">${fmt(g.aves)}</td><td class="num">${fmt(g.mortes)}</td><td class="num">${fmt(g.mortalidade, 2)}%</td><td class="num">${fmt(g.peso, 2)}</td></tr>`,
-          )
-          .join("")
+      ? groups.map((g) => {
+          const key = groupKey(g);
+          const expanded = state.expandedGroups.has(key);
+          const galpoes = aggregateGalpoes(g.rows).sort((a, b) => String(a.galpao).localeCompare(String(b.galpao), "pt-BR", { numeric: true }));
+          const parent = `<tr class="lotes-producer-row"><td>${esc(g.tipo)}</td><td><button class="lotes-expand-producer" type="button" data-expand-group="${esc(key)}" aria-expanded="${expanded}"><span>${expanded ? "−" : "+"}</span>${esc(g.produtor)}</button></td><td>${esc(g.linhagem)}</td><td class="num">${fmt(g.aves)}</td><td class="num">${fmt(g.mortes)}</td><td class="num">${fmt(g.mortalidade, 2)}%</td><td class="num">${fmt(g.peso, 2)}</td></tr>`;
+          if (!expanded) return parent;
+          const children = galpoes.map((item) => `<tr class="lotes-galpao-child"><td></td><td><span class="lotes-galpao-child-name">↳ Galpão ${esc(item.galpao)}</span></td><td>${esc(item.linhagem || g.linhagem)}</td><td class="num">${fmt(item.aves)}</td><td class="num">${fmt(item.mortes)}</td><td class="num">${fmt(item.mortalidade, 2)}%</td><td class="num">${fmt(generalWeightMean(item.rows), 2)}</td></tr>`).join("");
+          return parent + children;
+        }).join("")
       : '<tr><td colspan="7">Nenhum lote encontrado para os filtros selecionados.</td></tr>';
     const t = totals(rows);
-    $("tabelaLotesFoot").innerHTML =
-      `<tr><th colspan="3">Total</th><th class="num">${fmt(t.aves)}</th><th class="num">${fmt(t.mortes)}</th><th class="num">${fmt(t.mortalidade, 2)}%</th><th class="num">${fmt(t.peso, 2)}</th></tr>`;
+    $("tabelaLotesFoot").innerHTML = `<tr><th colspan="3">Total</th><th class="num">${fmt(t.aves)}</th><th class="num">${fmt(t.mortes)}</th><th class="num">${fmt(t.mortalidade, 2)}%</th><th class="num">${fmt(t.peso, 2)}</th></tr>`;
     updateSortHeaders();
   }
 
@@ -737,6 +923,7 @@
     renderCards(rows);
     renderCharts(rows);
     renderTable(rows);
+    renderGalpaoRanking(rows);
   }
 
   async function clearFilters() {
@@ -810,11 +997,31 @@
           renderTable(state.rows);
         });
       });
+      document.querySelectorAll("[data-lotes-view]").forEach((button) => button.addEventListener("click", () => setTableView(button.dataset.lotesView)));
+      $("galpaoIndicador").addEventListener("change", (event) => { state.galpaoIndicator = event.target.value; renderGalpaoRanking(state.rows); });
+      $("galpaoRanking").addEventListener("change", (event) => { state.galpaoRanking = event.target.value; renderGalpaoRanking(state.rows); });
+      document.addEventListener("click", (event) => {
+        const expand = event.target.closest("[data-expand-group]");
+        if (expand) {
+          const key = expand.dataset.expandGroup;
+          state.expandedGroups.has(key) ? state.expandedGroups.delete(key) : state.expandedGroups.add(key);
+          renderTable(state.rows);
+          return;
+        }
+        const detail = event.target.closest("[data-galpao-detail]");
+        if (detail) {
+          const [produtor, galpao] = detail.dataset.galpaoDetail.split("||");
+          openGalpaoDetail(produtor, galpao);
+        }
+      });
+      $("galpaoDrawerFechar").addEventListener("click", closeGalpaoDetail);
+      $("galpaoDrawerBackdrop").addEventListener("click", closeGalpaoDetail);
+      document.addEventListener("keydown", (event) => { if (event.key === "Escape" && !$("galpaoDrawer").classList.contains("hidden")) closeGalpaoDetail(); });
       render();
       window.addEventListener("resize", () =>
         state.charts.forEach((chart) => chart.resize()),
       );
-      new MutationObserver(() => renderCharts(state.rows)).observe(
+      new MutationObserver(() => { renderCharts(state.rows); renderGalpaoRanking(state.rows); }).observe(
         document.documentElement,
         { attributes: true, attributeFilter: ["data-theme"] },
       );

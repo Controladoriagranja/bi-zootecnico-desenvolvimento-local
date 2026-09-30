@@ -33,6 +33,14 @@
 
     const fmt = value => value === null ? "—" : new Intl.NumberFormat("pt-BR").format(Number(value || 0));
     const fmtSigned = value => `${value > 0 ? "+" : ""}${fmt(value)}`;
+    const differencePercent = (programada, diferenca) => {
+        const base = Number(programada);
+        const diff = Number(diferenca);
+        return Number.isFinite(base) && base !== 0 && Number.isFinite(diff) ? (diff / base) * 100 : null;
+    };
+    const fmtSignedPercent = value => value === null || !Number.isFinite(Number(value))
+        ? "—"
+        : `${Number(value) > 0 ? "+" : ""}${Number(value).toLocaleString("pt-BR", {minimumFractionDigits: 2, maximumFractionDigits: 2})}%`;
     const fmtDate = value => {
         const [year, month, day] = value.split("-");
         return `${day}/${month}/${year}`;
@@ -76,7 +84,7 @@
         closeModal();
         // Não deixa resultados antigos visíveis sob um novo contexto de filtros.
         [els.kpiProgramada, els.kpiReal, els.kpiDiferenca, els.kpiRegistros].forEach(el => el.textContent = "—");
-        els.tbodyUnidades.innerHTML = '<tr><td colspan="6" class="abate-empty">Carregando dados…</td></tr>';
+        els.tbodyUnidades.innerHTML = '<tr><td colspan="7" class="abate-empty">Carregando dados…</td></tr>';
         els.tfootUnidades.innerHTML = "";
         try {
             if (refreshOptions) await filterController.loadOptions();
@@ -92,7 +100,7 @@
             statusBox.textContent = "Falha ao carregar";
             errorBox.textContent = error.message || String(error);
             errorBox.classList.remove("hidden");
-            els.tbodyUnidades.innerHTML = '<tr><td colspan="6" class="abate-empty">Não foi possível carregar os dados. Altere os filtros ou recarregue a página para tentar novamente.</td></tr>';
+            els.tbodyUnidades.innerHTML = '<tr><td colspan="7" class="abate-empty">Não foi possível carregar os dados. Altere os filtros ou recarregue a página para tentar novamente.</td></tr>';
         }
     }
 
@@ -192,13 +200,15 @@
      *   contar difQtdeRxP != null e != 0
      */
     function totals(rows) {
-        return rows.reduce((acc, row) => {
+        const result = rows.reduce((acc, row) => {
             acc.programada += row.programada;
             acc.real += row.real;
             acc.diferenca += row.difQtdeRxP;
             if (row.difQtdeRxP !== null && row.difQtdeRxP !== 0) acc.registrosComDiferenca += 1;
             return acc;
         }, { programada: 0, real: 0, diferenca: 0, registrosComDiferenca: 0 });
+        result.difPercent = differencePercent(result.programada, result.diferenca);
+        return result;
     }
 
     function diffStateClass(value) {
@@ -246,7 +256,7 @@
         els.tfootUnidades.innerHTML = "";
 
         if (!groups.length) {
-            els.tbodyUnidades.innerHTML = `<tr><td colspan="6" class="abate-empty">Nenhum registro encontrado para os filtros selecionados.</td></tr>`;
+            els.tbodyUnidades.innerHTML = `<tr><td colspan="7" class="abate-empty">Nenhum registro encontrado para os filtros selecionados.</td></tr>`;
             return;
         }
 
@@ -257,6 +267,7 @@
                 <td><strong>${escapeHtml(group.destino)}</strong></td>
                 <td class="num">${fmt(group.programada)}</td>
                 <td class="num">${fmt(group.real)}</td>
+                <td class="num">${fmtSignedPercent(group.difPercent)}</td>
                 <td class="num"><span class="abate-diff-pill ${diffStateClass(group.diferenca)}">${fmtSigned(group.diferenca)}</span></td>
                 <td class="num">${fmt(group.registrosComDiferenca)}</td>
                 <td class="action"><button class="mini-button" type="button">Ver produtores</button></td>
@@ -271,6 +282,7 @@
                 <th>Total</th>
                 <th class="num">${fmt(t.programada)}</th>
                 <th class="num">${fmt(t.real)}</th>
+                <th class="num">${fmtSignedPercent(t.difPercent)}</th>
                 <th class="num"><span class="abate-diff-pill ${diffStateClass(t.diferenca)}">${fmtSigned(t.diferenca)}</span></th>
                 <th class="num">${fmt(t.registrosComDiferenca)}</th>
                 <th><button class="mini-button" type="button" data-total-produtores>Ver produtores</button></th>
@@ -288,8 +300,16 @@
         els.modalReal.textContent = fmt(group.real);
         els.modalDiferenca.textContent = fmtSigned(group.diferenca);
         els.modalDiferenca.className = `abate-summary-diff ${diffStateClass(group.diferenca)}`;
+        const modalDifPercent = document.getElementById("modalDifPercent");
+        if (modalDifPercent) {
+            modalDifPercent.textContent = fmtSignedPercent(group.difPercent);
+            modalDifPercent.className = `abate-summary-diff ${diffStateClass(group.diferenca)}`;
+        }
 
-        els.tbodyProdutores.innerHTML = sorted(group.registros, detailSort)
+        els.tbodyProdutores.innerHTML = sorted(group.registros.map(row => ({
+            ...row,
+            difPercent: differencePercent(row.programada, row.difQtdeRxP)
+        })), detailSort)
             .map(row => `
                 <tr class="abate-row ${diffStateClass(row.difQtdeRxP)}">
                     <td data-label="Unidade">${escapeHtml(row.destino)}</td>
@@ -302,6 +322,7 @@
                     <td data-label="Modelo Aviário">${escapeHtml(row.modelo)}</td>
                     <td data-label="Qtde Programada" class="num">${fmt(row.programada)}</td>
                     <td data-label="Qtde Real" class="num">${fmt(row.real)}</td>
+                    <td data-label="Dif %" class="num">${fmtSignedPercent(row.difPercent)}</td>
                     <td data-label="Dif Qtde RxP" class="num"><span class="abate-diff-pill ${diffStateClass(row.difQtdeRxP)}">${fmtSigned(row.difQtdeRxP)}</span></td>
                 </tr>
             `).join("");
@@ -326,8 +347,8 @@
         reload();
     });
     setupFormulaModal();
-    setupSort(els.tbodyUnidades, ["destino", "programada", "real", "diferenca", "registrosComDiferenca"], unitSort, () => renderUnits(currentRows));
-    setupSort(els.tbodyProdutores, ["destino", "produtor", "tecnico", "data", "galpao", "lote", "tipoGranja", "modelo", "programada", "real", "difQtdeRxP"], detailSort, () => { if (currentGroup) openUnit(currentGroup); });
+    setupSort(els.tbodyUnidades, ["destino", "programada", "real", "difPercent", "diferenca", "registrosComDiferenca"], unitSort, () => renderUnits(currentRows));
+    setupSort(els.tbodyProdutores, ["destino", "produtor", "tecnico", "data", "galpao", "lote", "tipoGranja", "modelo", "programada", "real", "difPercent", "difQtdeRxP"], detailSort, () => { if (currentGroup) openUnit(currentGroup); });
     reload();
     loadFormulas();
 })();
