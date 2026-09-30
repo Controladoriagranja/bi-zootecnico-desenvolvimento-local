@@ -8,6 +8,7 @@
     const items = [
         { id: "desempenho", label: "Desempenho", href: "index.html" },
         { id: "lotes", label: "Lotes em Criação", href: "lotes.html" },
+        { id: "historico", label: "Histórico de Lotes", href: "historico.html" },
         { id: "diferenca-abate", label: "Diferença de Aves Abatidas", href: "diferenca-aves-abatidas.html" },
         { id: "formulas", label: "Fórmulas", href: "formulas.html" }
     ];

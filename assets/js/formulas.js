@@ -8,3 +8,5 @@ FormulaUI.render(document.getElementById("formulaLotesContainer"), FORMULAS_LOTE
 apiGet(APP_CONFIG.endpoints.rxpFormulas).then(result => {
     FormulaUI.render(document.getElementById("formulaRxpContainer"), result.metricas, "rxp");
 }).catch(error => { document.getElementById("formulaRxpContainer").textContent = error.message; });
+
+FormulaUI.render(document.getElementById("formulaHistoricoContainer"), HISTORICO_CALCULOS.formulas, "formula-historico");
